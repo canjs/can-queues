@@ -104,4 +104,7 @@ A PriorityQueue works just like a normal queue.  Except:
 
 ## Todo
 
-- [ ]
+- [ ] - batch numbers (basically once we did a mutate, but a new notify happened -> increment batchNum)
+- [ ] - .log() working
+- [ ] - .logStack() working
+  - Track the last task without being too expensive
