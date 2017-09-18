@@ -20,6 +20,10 @@ Exports an object with the following:
 	},
 
 	enqueueByQueue // A helper function used to queue a bunch of tasks.
+
+	stack,
+
+	logStack
 }
 ```
 
