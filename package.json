@@ -1,11 +1,11 @@
 {
-  "name": "queue",
+  "name": "can-queues",
   "version": "0.0.0",
   "description": "",
   "homepage": "",
   "repository": {
     "type": "git",
-    "url": "git://github.com//queue.git"
+    "url": "git://github.com/canjs/can-queues.git"
   },
   "author": {
     "name": "",
@@ -25,7 +25,7 @@
     "build": "node build.js",
     "develop": "done-serve --static --develop --port 8080"
   },
-  "main": "dist/cjs/queue",
+  "main": "dist/cjs/can-queues",
   "browser": {
     "transform": [
       "cssify"
@@ -41,7 +41,7 @@
     "donejs-plugin"
   ],
   "steal": {
-    "main": "queue",
+    "main": "can-queues",
     "configDependencies": [
       "live-reload"
     ],
@@ -60,6 +60,7 @@
     "can-component": "^3.0.7",
     "can-define": "^1.0.17",
     "can-stache": "^3.0.20",
+    "can-util": "^3.10.6",
     "can-view-autorender": "^3.0.4",
     "cssify": "^0.6.0",
     "steal-less": "^1.2.0",

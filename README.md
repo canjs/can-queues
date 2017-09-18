@@ -1,4 +1,4 @@
-# queue
+# can-queues
 
 [![Build Status](https://travis-ci.org//queue.svg?branch=master)](https://travis-ci.org//queue)
 
@@ -8,16 +8,18 @@ Exports an object with the following:
 {
 	Queue,         // The Queue type constructor
 	PriorityQueue, // The PriorityQueue type constructor
-	NOTIFY_QUEUE,  // A Queue used to tell objects that
+	notifyQueue,   // A Queue used to tell objects that
 	               //    derive a value that they should be updated.
-	DERIVE_QUEUE,  // A PriorityQueue used update values.
-	MUTATE_QUEUE,  // A Queue used to register tasks that might
+	deriveQueue,   // A PriorityQueue used update values.
+	mutateQueue,   // A Queue used to register tasks that might
 	               //    update other values.
 	batch: {
 		start,     // A function used to prevent the automatic flushing
 		           //    of the NOTIFY_QUEUE.
 		stop       // A function used to begin flushing the NOTIFY_QUEUE.
-	}
+	},
+
+	enqueueByQueue // A helper function used to queue a bunch of tasks.
 }
 ```
 
@@ -105,6 +107,4 @@ A PriorityQueue works just like a normal queue.  Except:
 ## Todo
 
 - [ ] - batch numbers (basically once we did a mutate, but a new notify happened -> increment batchNum)
-- [ ] - .log() working
-- [ ] - .logStack() working
-  - Track the last task without being too expensive
+- [ ] Implement priority, the ability to remove, and the number of items
