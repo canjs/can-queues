@@ -111,4 +111,5 @@ A PriorityQueue works just like a normal queue.  Except:
 ## Todo
 
 - [ ] - batch numbers (basically once we did a mutate, but a new notify happened -> increment batchNum)
-- [ ] Implement priority, the ability to remove, and the number of items
+- [ ] Implement priority, the ability to remove,
+  - and the number of items?
