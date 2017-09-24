@@ -1,88 +1,13 @@
 var canDev = require('can-util/js/dev/dev');
-
-var noop = function() {};
-var lastTask;
-
-var Queue = function(name, callbacks) {
-	this.callbacks = Object.assign({
-		onFirstTask: noop,
-		// default clears the last task
-		onComplete: function(){
-			lastTask = null;
-		}
-	}, callbacks || {});
-	this.name = name;
-	this.index = 0;
-	this.tasks = [];
-	this._log = false;
-};
-Queue.prototype.enqueue = function(fn, context, args, meta) {
-	this.tasks.push({
-		fn: fn,
-		context: context,
-		args: args,
-		meta: meta || {}
-	});
-	//!steal-remove-start
-	var task = this.tasks[this.tasks.length - 1];
-	task.meta.stack = this;
-	task.meta.parentTask = lastTask;
-
-	if(this._log) {
-		var log = task.meta.log ? meta.log : [fn.name, task];
-		canDev.log.apply(canDev, [this.name + " enqueue task:"].concat(log));
-	}
-	//!steal-remove-end
-
-	if (this.tasks.length === 1) {
-		this.callbacks.onFirstTask(this);
-	}
-};
-Queue.prototype._flush = function() {
-	while (this.index < this.tasks.length) {
-		var task = this.tasks[this.index++];
-		//!steal-remove-start
-		if(this._log) {
-			var log = task.meta && task.meta.log ? task.meta.log : [task.fn.name, task];
-			canDev.log.apply(canDev, [this.name + " run task:"].concat(log));
-		}
-		//!steal-remove-end
-		lastTask = task;
-		task.fn.apply(task.context, task.args);
-	}
-};
-Queue.prototype.flush = function() {
-	this._flush();
-	this.index = 0;
-	this.tasks = [];
-	this.callbacks.onComplete(this);
-};
-Queue.prototype.log = function(){
-	this._log = true;
-};
-
-
-
-var PriorityQueue = function() {
-	Queue.apply(this, arguments);
-	this.taskMap = new Map();
-};
-PriorityQueue.prototype = Object.create(Queue.prototype);
-PriorityQueue.prototype.enqueue = function(fn) {
-	if (!this.taskMap.has(fn)) {
-		return Queue.prototype.enqueue.apply(this, arguments);
-	}
-};
-PriorityQueue.prototype.flush = function() {
-	this._flush();
-	this.index = 0;
-	this.tasks = [];
-	this.taskMap = new Map();
-	this.callbacks.onComplete(this);
-};
+var Queue = require('./queue');
+var PriorityQueue = require('./priority-queue');
+var queueState = require('./queue-state');
 
 var batchStartCounter = 0;
 var addedNotifyTask = false;
+var isFlushing = false;
+var batchNum = 0;
+
 
 
 var NOTIFY_QUEUE, DERIVE_QUEUE, MUTATE_QUEUE;
@@ -107,15 +32,18 @@ DERIVE_QUEUE = new PriorityQueue("DERIVE", {
 	},
 	onFirstTask: function() {
 		//console.log("DERIVE first task enqueued.")
+		addedNotifyTask = true;
 	}
 });
 MUTATE_QUEUE = new Queue("MUTATE", {
 	onComplete: function() {
 		//console.log("MUTATE complete.")
-		lastTask = null;
+		queueState.lastTask = null;
+		isFlushing = false;
 	},
 	onFirstTask: function() {
 		//console.log("MUTATE first task enqueued.")
+		addedNotifyTask = true;
 	}
 });
 
@@ -129,15 +57,25 @@ var queues = {
 	batch: {
 		start: function() {
 			batchStartCounter++;
+			if(batchStartCounter === 1) {
+				batchNum++;
+			}
 		},
 		stop: function() {
 			batchStartCounter--;
 			if (batchStartCounter === 0) {
 				if (addedNotifyTask) {
 					addedNotifyTask = false;
+					isFlushing = true;
 					NOTIFY_QUEUE.flush();
 				}
 			}
+		},
+		isCollecting: function(){
+			return batchStartCounter > 0;
+		},
+		number: function(){
+			return batchNum;
 		}
 	},
 	enqueueByQueue: function enqueueByQueue(fnByQueue, context, args, makeMeta, reasonLog) {
@@ -146,7 +84,7 @@ var queues = {
 			var name = queueName + "Queue";
 			var QUEUE = queues[name];
 			(fnByQueue[queueName] || []).forEach(function(handler) {
-				var meta = makeMeta(handler, context, args);
+				var meta = makeMeta(handler, context, args) || {};
 				meta.reasonLog = reasonLog;
 				QUEUE.enqueue(handler, context, args, meta);
 			});
@@ -154,7 +92,7 @@ var queues = {
 		queues.batch.stop();
 	},
 	stack: function(){
-		var current = lastTask;
+		var current = queueState.lastTask;
 		var stack = [];
 		while(current) {
 			stack.push(current);
@@ -169,7 +107,13 @@ var queues = {
 			canDev.log.apply(canDev, [task.meta.stack.name + " ran task:"].concat(log));
 		});
 	},
+	taskCount: function(){
+		return NOTIFY_QUEUE.tasks.length + DERIVE_QUEUE.tasks.length + MUTATE_QUEUE.tasks.length;
+	},
+	// true if something added to the queue does not need to call .flush()
+	isFlushing: function(){
 
+	}
 };
 
 module.exports = queues;

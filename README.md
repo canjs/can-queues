@@ -113,3 +113,4 @@ A PriorityQueue works just like a normal queue.  Except:
 - [ ] - batch numbers (basically once we did a mutate, but a new notify happened -> increment batchNum)
 - [ ] Implement priority, the ability to remove,
   - and the number of items?
+- [ ] A callback to know when the queue has ended.

@@ -264,3 +264,35 @@ if (System.env.indexOf('production') < 0) {
 	});
 
 }
+
+QUnit.test("priority queue orders tasks correctly", function(){
+	var queue = new queues.PriorityQueue("priority");
+
+	var order = 0;
+	queue.enqueue(function(){
+		order++;
+		QUnit.equal(order, 3, "priority 1 ran after priority 0");
+	},null,[],{
+		priority: 1
+	});
+
+	var fn = function(){
+		order++;
+		QUnit.equal(order, 2, "priority 2 ran after priority 0 because it was flushed");
+	};
+
+	queue.enqueue(function(){
+		order++;
+		QUnit.equal(order, 1, "priority 0 ran first");
+		queue.flushQueuedTask(fn);
+	},null,[],{
+		priority: 0
+	});
+
+
+	queue.enqueue(fn,null,[],{
+		priority: 2
+	});
+
+	queue.flush();
+});

@@ -23,46 +23,22 @@
     "build": "node build.js",
     "develop": "done-serve --static --develop --port 8080"
   },
-  "main": "dist/cjs/can-queues",
-  "browser": {
-    "transform": [
-      "cssify"
-    ]
-  },
-  "browserify": {
-    "transform": [
-      "cssify"
-    ]
-  },
+  "main": "./can-queues.js",
   "keywords": [
     "",
     "donejs-plugin"
   ],
   "steal": {
     "main": "can-queues",
-    "configDependencies": [
-      "live-reload"
-    ],
     "npmIgnore": [
       "testee",
       "generator-donejs",
       "donejs-cli",
       "steal-tools"
-    ],
-    "plugins": [
-      "steal-less",
-      "steal-stache"
     ]
   },
   "dependencies": {
-    "can-component": "^3.0.7",
-    "can-define": "^1.0.17",
-    "can-stache": "^3.0.20",
-    "can-util": "^3.10.6",
-    "can-view-autorender": "^3.0.4",
-    "cssify": "^0.6.0",
-    "steal-less": "^1.2.0",
-    "steal-stache": "^3.0.5"
+    "can-util": "^3.10.6"
   },
   "devDependencies": {
     "jshint": "^2.9.1",
