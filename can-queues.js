@@ -7,6 +7,7 @@ var batchStartCounter = 0;
 var addedNotifyTask = false;
 var isFlushing = false;
 var batchNum = 0;
+var batchData;
 
 
 
@@ -59,6 +60,7 @@ var queues = {
 			batchStartCounter++;
 			if(batchStartCounter === 1) {
 				batchNum++;
+				batchData = {number: batchNum};
 			}
 		},
 		stop: function() {
@@ -76,20 +78,25 @@ var queues = {
 		},
 		number: function(){
 			return batchNum;
+		},
+		data: function() {
+			return batchData;
 		}
 	},
 	enqueueByQueue: function enqueueByQueue(fnByQueue, context, args, makeMeta, reasonLog) {
-		queues.batch.start();
-		["notify", "derive", "mutate"].forEach(function(queueName) {
-			var name = queueName + "Queue";
-			var QUEUE = queues[name];
-			(fnByQueue[queueName] || []).forEach(function(handler) {
-				var meta = makeMeta(handler, context, args) || {};
-				meta.reasonLog = reasonLog;
-				QUEUE.enqueue(handler, context, args, meta);
+		if(fnByQueue) {
+			queues.batch.start();
+			["notify", "derive", "mutate"].forEach(function(queueName) {
+				var name = queueName + "Queue";
+				var QUEUE = queues[name];
+				(fnByQueue[queueName] || []).forEach(function(handler) {
+					var meta = makeMeta(handler, context, args) || {};
+					meta.reasonLog = reasonLog;
+					QUEUE.enqueue(handler, context, args, meta);
+				});
 			});
-		});
-		queues.batch.stop();
+			queues.batch.stop();
+		}
 	},
 	stack: function(){
 		var current = queueState.lastTask;
