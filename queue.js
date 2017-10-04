@@ -37,16 +37,16 @@ Queue.prototype._logEnqueue = function(task){
     task.meta.stack = this;
     task.meta.parentTask = queueState.lastTask;
 
-    if(this._log) {
-        var log = task.meta.log ? meta.log : [task.fn.name, task];
-        canDev.log.apply(canDev, [this.name + " enqueue task:"].concat(log));
+    if(this._log === true || this._log === "enqueue") {
+        var log = task.meta.log ? task.meta.log : [task.fn.name, task];
+        canDev.log.apply(canDev, [this.name + " enqueuing:"].concat(log));
     }
 };
 
 Queue.prototype._logFlush = function(task){
-    if(this._log) {
+    if(this._log === true || this._log === "flush") {
         var log = task.meta && task.meta.log ? task.meta.log : [task.fn.name, task];
-        canDev.log.apply(canDev, [this.name + " run task:"].concat(log));
+        canDev.log.apply(canDev, [this.name + " running  :"].concat(log));
     }
     queueState.lastTask = task;
 
@@ -65,7 +65,7 @@ Queue.prototype.flush = function() {
 	this.callbacks.onComplete(this);
 };
 Queue.prototype.log = function(){
-	this._log = true;
+	this._log = arguments.length ? arguments[0] : true;
 };
 
 module.exports = Queue;

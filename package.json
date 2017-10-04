@@ -1,16 +1,16 @@
 {
   "name": "can-queues",
   "version": "0.0.7",
-  "description": "",
+  "description": "A light weight JavaScript task queue",
   "homepage": "",
   "repository": {
     "type": "git",
     "url": "git://github.com/canjs/can-queues.git"
   },
   "author": {
-    "name": "",
-    "email": "",
-    "url": ""
+    "name": "DoneJS Core Team",
+    "email": "core@donejs.com",
+    "url": "http://donejs.com"
   },
   "scripts": {
     "postpublish": "git push --tags && git push",
@@ -25,8 +25,7 @@
   },
   "main": "./can-queues.js",
   "keywords": [
-    "",
-    "donejs-plugin"
+    "canjs"
   ],
   "steal": {
     "main": "can-queues",

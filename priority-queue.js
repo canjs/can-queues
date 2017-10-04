@@ -54,7 +54,7 @@ PriorityQueue.prototype.flush = function() {
     while(true) {
         if( this.curPriorityIndex <= this.curPriorityMax ) {
             var taskContainer = this.taskContainersByPriority[this.curPriorityIndex];
-            if(taskContainer.tasks.length > taskContainer.index) {
+            if(taskContainer && (taskContainer.tasks.length > taskContainer.index) ) {
                 var task = taskContainer.tasks[taskContainer.index++];
                 //!steal-remove-start
         		this._logFlush(task);

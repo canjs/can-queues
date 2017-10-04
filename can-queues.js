@@ -117,9 +117,13 @@ var queues = {
 	taskCount: function(){
 		return NOTIFY_QUEUE.tasks.length + DERIVE_QUEUE.tasks.length + MUTATE_QUEUE.tasks.length;
 	},
-	// true if something added to the queue does not need to call .flush()
-	isFlushing: function(){
-
+	flush: function(){
+		NOTIFY_QUEUE.flush();
+	},
+	log: function(){
+		NOTIFY_QUEUE.log.apply(NOTIFY_QUEUE, arguments);
+		DERIVE_QUEUE.log.apply(DERIVE_QUEUE, arguments);
+		MUTATE_QUEUE.log.apply(MUTATE_QUEUE, arguments);
 	}
 };
 
