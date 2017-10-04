@@ -160,11 +160,11 @@ if (System.env.indexOf('production') < 0) {
 		var oldLog = canDev.log;
 
 		canDev.log = function(area, name) {
-			QUnit.equal("Test enqueue task:", area);
+			QUnit.equal("Test enqueuing:", area);
 			QUnit.equal("fnName", name);
 
 			canDev.log = function(area, name) {
-				QUnit.equal("Test run task:", area);
+				QUnit.equal("Test running  :", area);
 				QUnit.equal("fnName", name);
 			};
 		};
@@ -295,4 +295,26 @@ QUnit.test("priority queue orders tasks correctly", function(){
 	});
 
 	queue.flush();
+});
+
+QUnit.test("priority queue works with holes in the order", function(){
+	var queue = new queues.PriorityQueue("priority");
+	var ran = [];
+
+	queue.enqueue(function(){
+		ran.push("priority 0")
+	},null,[],{
+		priority: 0
+	});
+
+	queue.enqueue(function(){
+		ran.push("priority 10")
+	},null,[],{
+		priority: 10
+	});
+
+
+	queue.flush();
+
+	QUnit.deepEqual(ran, ["priority 0", "priority 10"])
 });
