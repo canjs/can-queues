@@ -302,13 +302,13 @@ QUnit.test("priority queue works with holes in the order", function(){
 	var ran = [];
 
 	queue.enqueue(function(){
-		ran.push("priority 0")
+		ran.push("priority 0");
 	},null,[],{
 		priority: 0
 	});
 
 	queue.enqueue(function(){
-		ran.push("priority 10")
+		ran.push("priority 10");
 	},null,[],{
 		priority: 10
 	});
@@ -316,5 +316,5 @@ QUnit.test("priority queue works with holes in the order", function(){
 
 	queue.flush();
 
-	QUnit.deepEqual(ran, ["priority 0", "priority 10"])
+	QUnit.deepEqual(ran, ["priority 0", "priority 10"]);
 });

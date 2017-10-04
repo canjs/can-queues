@@ -118,7 +118,7 @@ var queues = {
 		return NOTIFY_QUEUE.tasks.length + DERIVE_QUEUE.tasks.length + MUTATE_QUEUE.tasks.length;
 	},
 	flush: function(){
-		NOTIFY_QUEUE.flush()
+		NOTIFY_QUEUE.flush();
 	},
 	log: function(){
 		NOTIFY_QUEUE.log.apply(NOTIFY_QUEUE, arguments);
