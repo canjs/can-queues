@@ -37,6 +37,7 @@
     ]
   },
   "dependencies": {
+    "can-namespace": "^1.0.0",
     "can-util": "^3.10.6"
   },
   "devDependencies": {
