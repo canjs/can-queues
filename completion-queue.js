@@ -21,8 +21,9 @@ CompletionQueue.prototype.flush = function() {
     	}
     	this.index = 0;
     	this.tasks = [];
+		this.flushCount--;
     	this.callbacks.onComplete(this);
-        this.flushCount --;
+
     }
 
 };
