@@ -1,6 +1,7 @@
 var QUnit = require('steal-qunit');
 var queues = require("can-queues");
 var canDev = require('can-util/js/dev/dev');
+var CompletionQueue = require("./completion-queue")
 
 QUnit.module('can-queues');
 
@@ -317,4 +318,29 @@ QUnit.test("priority queue works with holes in the order", function(){
 	queue.flush();
 
 	QUnit.deepEqual(ran, ["priority 0", "priority 10"]);
+});
+
+
+QUnit.test("CompletionQueue", function(){
+	var queue = new CompletionQueue("DOM");
+
+	var ran = [];
+
+	queue.enqueue(function(){
+		ran.push("task 1:a");
+
+		queue.enqueue(function(){
+			ran.push("task 3");
+		}, null,[],{});
+
+		queue.flush();
+		ran.push("task 1:b");
+	},null,[],{});
+
+	queue.enqueue(function(){
+		ran.push("task 2");
+	},null,[],{});
+
+	queue.flush();
+	QUnit.deepEqual(ran, ["task 1:a", "task 1:b", "task 2", "task 3"]);
 });

@@ -3,6 +3,7 @@ var Queue = require('./queue');
 var PriorityQueue = require('./priority-queue');
 var queueState = require('./queue-state');
 
+
 var batchStartCounter = 0;
 var addedNotifyTask = false;
 var isFlushing = false;
@@ -52,6 +53,7 @@ MUTATE_QUEUE = new Queue("MUTATE", {
 var queues = {
 	Queue: Queue,
 	PriorityQueue: PriorityQueue,
+	//CompletionQueue: CompletionQueue,
 	notifyQueue: NOTIFY_QUEUE,
 	deriveQueue: DERIVE_QUEUE,
 	mutateQueue: MUTATE_QUEUE,
