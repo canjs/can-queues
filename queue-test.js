@@ -318,3 +318,20 @@ QUnit.test("priority queue works with holes in the order", function(){
 
 	QUnit.deepEqual(ran, ["priority 0", "priority 10"]);
 });
+
+
+QUnit.test("DOM_UI_QUEUE", function(){
+	var ran = [];
+	queues.enqueueByQueue({
+		"notify": [function notify(){ ran.push("notify"); }],
+		"derive": [
+			function derive1(){ ran.push("derive1"); },
+			function derive2(){ ran.push("derive2"); }
+		],
+		"domUI": [function domUI(){ ran.push("domUI"); }],
+		"mutate": [function domUI(){ ran.push("mutate"); }]
+	});
+
+	QUnit.deepEqual(ran, ["notify","derive1","derive2","domUI","mutate"], "ran all tasks");
+
+});

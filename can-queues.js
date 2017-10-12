@@ -9,9 +9,9 @@ var isFlushing = false;
 var batchNum = 0;
 var batchData;
 
+var emptyObject = function(){ return {}; };
 
-
-var NOTIFY_QUEUE, DERIVE_QUEUE, MUTATE_QUEUE;
+var NOTIFY_QUEUE, DERIVE_QUEUE, DOM_UI_QUEUE, MUTATE_QUEUE;
 NOTIFY_QUEUE = new Queue("NOTIFY", {
 	onComplete: function() {
 		//console.log("NOTIFY complete.")
@@ -29,6 +29,16 @@ NOTIFY_QUEUE = new Queue("NOTIFY", {
 DERIVE_QUEUE = new PriorityQueue("DERIVE", {
 	onComplete: function() {
 		//console.log("DERIVE complete.")
+		DOM_UI_QUEUE.flush();
+	},
+	onFirstTask: function() {
+		//console.log("DERIVE first task enqueued.")
+		addedNotifyTask = true;
+	}
+});
+DOM_UI_QUEUE = new Queue("DOM_UI", {
+	onComplete: function() {
+		//console.log("DERIVE complete.")
 		MUTATE_QUEUE.flush();
 	},
 	onFirstTask: function() {
@@ -36,6 +46,7 @@ DERIVE_QUEUE = new PriorityQueue("DERIVE", {
 		addedNotifyTask = true;
 	}
 });
+
 MUTATE_QUEUE = new Queue("MUTATE", {
 	onComplete: function() {
 		//console.log("MUTATE complete.")
@@ -54,6 +65,7 @@ var queues = {
 	PriorityQueue: PriorityQueue,
 	notifyQueue: NOTIFY_QUEUE,
 	deriveQueue: DERIVE_QUEUE,
+	domUIQueue: DOM_UI_QUEUE,
 	mutateQueue: MUTATE_QUEUE,
 	batch: {
 		start: function() {
@@ -85,15 +97,19 @@ var queues = {
 	},
 	enqueueByQueue: function enqueueByQueue(fnByQueue, context, args, makeMeta, reasonLog) {
 		if(fnByQueue) {
+			makeMeta = makeMeta || emptyObject;
 			queues.batch.start();
-			["notify", "derive", "mutate"].forEach(function(queueName) {
+			["notify", "derive","domUI", "mutate"].forEach(function(queueName) {
 				var name = queueName + "Queue";
-				var QUEUE = queues[name];
-				(fnByQueue[queueName] || []).forEach(function(handler) {
-					var meta = makeMeta(handler, context, args) || {};
-					meta.reasonLog = reasonLog;
-					QUEUE.enqueue(handler, context, args, meta);
-				});
+				var QUEUE = queues[name],
+					tasks = fnByQueue[queueName];
+				if(tasks !== undefined) {
+					tasks.forEach(function(handler) {
+						var meta = makeMeta(handler, context, args);
+						meta.reasonLog = reasonLog;
+						QUEUE.enqueue(handler, context, args, meta);
+					});
+				}
 			});
 			queues.batch.stop();
 		}
@@ -115,7 +131,7 @@ var queues = {
 		});
 	},
 	taskCount: function(){
-		return NOTIFY_QUEUE.tasks.length + DERIVE_QUEUE.tasks.length + MUTATE_QUEUE.tasks.length;
+		return NOTIFY_QUEUE.tasks.length + DERIVE_QUEUE.tasks.length + DOM_UI_QUEUE.tasks.length + MUTATE_QUEUE.tasks.length;
 	},
 	flush: function(){
 		NOTIFY_QUEUE.flush();
@@ -123,6 +139,7 @@ var queues = {
 	log: function(){
 		NOTIFY_QUEUE.log.apply(NOTIFY_QUEUE, arguments);
 		DERIVE_QUEUE.log.apply(DERIVE_QUEUE, arguments);
+		DOM_UI_QUEUE.log.apply(DOM_UI_QUEUE, arguments);
 		MUTATE_QUEUE.log.apply(MUTATE_QUEUE, arguments);
 	}
 };
