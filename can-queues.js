@@ -2,6 +2,7 @@ var canDev = require('can-util/js/dev/dev');
 var Queue = require('./queue');
 var PriorityQueue = require('./priority-queue');
 var queueState = require('./queue-state');
+var CompletionQueue = require("./completion-queue");
 
 var batchStartCounter = 0;
 var addedNotifyTask = false;
@@ -36,7 +37,7 @@ DERIVE_QUEUE = new PriorityQueue("DERIVE", {
 		addedNotifyTask = true;
 	}
 });
-DOM_UI_QUEUE = new Queue("DOM_UI", {
+DOM_UI_QUEUE = new CompletionQueue("DOM_UI", {
 	onComplete: function() {
 		//console.log("DERIVE complete.")
 		MUTATE_QUEUE.flush();
@@ -63,6 +64,7 @@ MUTATE_QUEUE = new Queue("MUTATE", {
 var queues = {
 	Queue: Queue,
 	PriorityQueue: PriorityQueue,
+	//CompletionQueue: CompletionQueue,
 	notifyQueue: NOTIFY_QUEUE,
 	deriveQueue: DERIVE_QUEUE,
 	domUIQueue: DOM_UI_QUEUE,
