@@ -3,6 +3,7 @@ var Queue = require('./queue');
 var PriorityQueue = require('./priority-queue');
 var queueState = require('./queue-state');
 var CompletionQueue = require("./completion-queue");
+var ns = require("can-namespace");
 
 var batchStartCounter = 0;
 var addedNotifyTask = false;
@@ -145,5 +146,8 @@ var queues = {
 		MUTATE_QUEUE.log.apply(MUTATE_QUEUE, arguments);
 	}
 };
-
-module.exports = queues;
+if (ns.queues) {
+	throw new Error("You can't have two versions of can-queues, check your dependencies");
+} else {
+	module.exports = ns.queues = queues;
+}
