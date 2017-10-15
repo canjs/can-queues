@@ -360,3 +360,36 @@ QUnit.test("CompletionQueue", function(){
 	queue.flush();
 	QUnit.deepEqual(ran, ["task 1:a", "task 1:b", "task 2", "task 3"]);
 });
+
+
+QUnit.test("priority queue can't flush already ran task", function(){
+	var queue = new queues.PriorityQueue("priority");
+	var ran = [];
+
+	var task1 = function(){
+		ran.push("1");
+	};
+
+	queue.enqueue(task1,null,[],{
+		priority: 0
+	});
+
+	queue.enqueue(function(){
+		QUnit.equal(queue.isEnqueued(task1), false, "not enqueued");
+		queue.flushQueuedTask(task1);
+		ran.push("2");
+	},null,[],{
+		priority: 0
+	});
+
+	queue.enqueue(function(){
+		ran.push("3");
+	},null,[],{
+		priority: 0
+	});
+
+
+	queue.flush();
+
+	QUnit.deepEqual(ran, ["1", "2","3"]);
+});
