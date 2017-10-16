@@ -14,7 +14,7 @@
   },
   "scripts": {
     "postpublish": "git push --tags && git push",
-    "testee": "DEBUG=testee:* testee test.html --browsers firefox",
+    "testee": "testee test.html --browsers firefox",
     "test": "npm run jshint && npm run testee",
     "jshint": "jshint ./*.js --config",
     "release:patch": "npm version patch && npm publish",

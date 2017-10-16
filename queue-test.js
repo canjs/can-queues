@@ -4,8 +4,6 @@ var canDev = require('can-util/js/dev/dev');
 
 QUnit.module('can-queues');
 
-
-
 QUnit.test('basics', function() {
 	function makeCallbackMeta(handler, context){
 		return {
@@ -185,8 +183,10 @@ if (System.env.indexOf('production') < 0) {
 				log: [handler.name + " by " + context.name]
 			};
 		}
+
 		var callbackOrder = [];
 		var map, fullName, mapFullName;
+
 		// var map = new DefineMap({first: "Justin", last: "Meyer", fullName: ""}); //map:1
 		map = {
 			name: "map",
@@ -237,16 +237,18 @@ if (System.env.indexOf('production') < 0) {
 			mutateHandlers: [function mapFullName_handler() {
 				callbackOrder.push("gc1_eventHandler_writableChild_dispatch");
 				var stack = queues.stack();
-				QUnit.deepEqual( stack.map(function(task){
+
+				QUnit.deepEqual(stack.map(function(task){
 					return task.meta.stack.name + " " +task.context.name + " " +
 						task.fn.name;
 				}), [
-					"MUTATE map.fullName mapFullName_handler",
-					"MUTATE fullName fullName_setFullNameProperty",
+					"NOTIFY map derivedChild_queueUpdate",
 					"DERIVE fullName update",
-					"NOTIFY map derivedChild_queueUpdate"
+					"MUTATE fullName fullName_setFullNameProperty",
+					"MUTATE map.fullName mapFullName_handler",
 				]);
-				QUnit.deepEqual(stack[stack.length-1].meta.reasonLog, ["map.first = 'ramiya'"]);
+
+				QUnit.deepEqual(stack[0].meta.reasonLog, ["map.first = 'ramiya'"]);
 			}],
 			dispatch: function() {
 				callbackOrder.push("mapFullName.dispatch");
@@ -259,7 +261,6 @@ if (System.env.indexOf('production') < 0) {
 
 		// map.first = 'ramiya'
 		map.dispatch();
-
 
 	});
 
