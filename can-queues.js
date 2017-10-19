@@ -108,7 +108,7 @@ var queues = {
 					tasks = fnByQueue[queueName];
 				if(tasks !== undefined) {
 					tasks.forEach(function(handler) {
-						var meta = makeMeta(handler, context, args);
+						var meta = makeMeta && makeMeta(handler, context, args);
 						meta.reasonLog = reasonLog;
 						QUEUE.enqueue(handler, context, args, meta);
 					});
@@ -121,7 +121,7 @@ var queues = {
 		var current = queueState.lastTask;
 		var stack = [];
 		while(current) {
-			stack.push(current);
+			stack.unshift(current);
 			current = current.meta.parentTask;
 		}
 		return stack;

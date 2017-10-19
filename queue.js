@@ -38,7 +38,7 @@ Queue.prototype._logEnqueue = function(task){
     task.meta.parentTask = queueState.lastTask;
 
     if(this._log === true || this._log === "enqueue") {
-        var log = task.meta.log ? task.meta.log : [task.fn.name, task];
+        var log = task.meta.log ? task.meta.log.concat(task) : [task.fn.name, task];
         canDev.log.apply(canDev, [this.name + " enqueuing:"].concat(log));
     }
 };
