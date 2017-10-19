@@ -1,6 +1,7 @@
 var QUnit = require('steal-qunit');
 var queues = require("can-queues");
 var canDev = require('can-util/js/dev/dev');
+var CompletionQueue = require("./completion-queue");
 
 QUnit.module('can-queues');
 
@@ -318,4 +319,78 @@ QUnit.test("priority queue works with holes in the order", function(){
 	queue.flush();
 
 	QUnit.deepEqual(ran, ["priority 0", "priority 10"]);
+});
+
+
+QUnit.test("DOM_UI_QUEUE", function(){
+	var ran = [];
+	queues.enqueueByQueue({
+		"notify": [function notify(){ ran.push("notify"); }],
+		"derive": [
+			function derive1(){ ran.push("derive1"); },
+			function derive2(){ ran.push("derive2"); }
+		],
+		"domUI": [function domUI(){ ran.push("domUI"); }],
+		"mutate": [function domUI(){ ran.push("mutate"); }]
+	});
+
+	QUnit.deepEqual(ran, ["notify","derive1","derive2","domUI","mutate"], "ran all tasks");
+
+});
+
+QUnit.test("CompletionQueue", function(){
+	var queue = new CompletionQueue("DOM");
+
+	var ran = [];
+
+	queue.enqueue(function(){
+		ran.push("task 1:a");
+
+		queue.enqueue(function(){
+			ran.push("task 3");
+		}, null,[],{});
+
+		queue.flush();
+		ran.push("task 1:b");
+	},null,[],{});
+
+	queue.enqueue(function(){
+		ran.push("task 2");
+	},null,[],{});
+
+	queue.flush();
+	QUnit.deepEqual(ran, ["task 1:a", "task 1:b", "task 2", "task 3"]);
+});
+
+
+QUnit.test("priority queue can't flush already ran task", function(){
+	var queue = new queues.PriorityQueue("priority");
+	var ran = [];
+
+	var task1 = function(){
+		ran.push("1");
+	};
+
+	queue.enqueue(task1,null,[],{
+		priority: 0
+	});
+
+	queue.enqueue(function(){
+		QUnit.equal(queue.isEnqueued(task1), false, "not enqueued");
+		queue.flushQueuedTask(task1);
+		ran.push("2");
+	},null,[],{
+		priority: 0
+	});
+
+	queue.enqueue(function(){
+		ran.push("3");
+	},null,[],{
+		priority: 0
+	});
+
+
+	queue.flush();
+
+	QUnit.deepEqual(ran, ["1", "2","3"]);
 });

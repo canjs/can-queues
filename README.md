@@ -11,6 +11,8 @@ Exports an object with the following:
 	notifyQueue,   // A Queue used to tell objects that
 	               //    derive a value that they should be updated.
 	deriveQueue,   // A PriorityQueue used update values.
+	domUIQueue,    // A Queue used for updating the DOM or other UI after
+	               //    state has settled, but before user tasks
 	mutateQueue,   // A Queue used to register tasks that might
 	               //    update other values.
 	batch: {
@@ -34,7 +36,7 @@ listen to events with `.on`, you'll want the following:
 
 ```js
 var canSymbol = require("can-symbol");
-var QUEUE = require("@bitovi/queue");
+var queues = require("can-queues");
 
 var observable = {
 	_cid: 123142123123,
@@ -54,14 +56,14 @@ var observable = {
 		var args = [newValue, this.value]
 		this.value = newValue;
 		// start a batch so we don't .flush() the NOTIFY_QUEUE until everything has been added
-		QUEUE.batch.start();
+		queues.batch.start();
 		this.handlers.notify.forEach((handler) => {
-			QUEUE.NOTIFY_QUEUE.enqueue(handler, this, args, {log: [handler.name+" by "+this._cid]});
+			queues.notifyQueue.enqueue(handler, this, args, {log: [handler.name+" by "+this._cid]});
 		})
 		this.handlers.mutate.forEach((handler) => {
-			QUEUE.MUTATE_QUEUE.enqueue(handler, this, args, {log: [handler.name+" by "+this._cid]});
+			queues.mutateQueue.enqueue(handler, this, args, {log: [handler.name+" by "+this._cid]});
 		})
-		QUEUE.batch.stop();
+		queues.batch.stop();
 	}
 }
 ```

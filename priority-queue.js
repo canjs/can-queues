@@ -60,7 +60,7 @@ PriorityQueue.prototype.flush = function() {
         		this._logFlush(task);
                 //!steal-remove-end
                 this.tasksRemaining--;
-                this.taskMap["delete"](task);
+                this.taskMap["delete"](task.fn);
         		task.fn.apply(task.context, task.args);
             } else {
                 this.curPriorityIndex++;
@@ -82,16 +82,17 @@ PriorityQueue.prototype.flushQueuedTask = function(fn) {
         var priority = task.meta.priority || 0;
 
     	var taskContainer = this.taskContainersByPriority[priority];
-		var index = taskContainer.tasks.indexOf(task);
-		taskContainer.tasks.splice(index,1);
+		var index = taskContainer.tasks.indexOf(task, taskContainer.index);
+		if( index >=0 ) {
+			taskContainer.tasks.splice(index,1);
 
-		//!steal-remove-start
-		this._logFlush(task);
-		//!steal-remove-end
-		this.tasksRemaining--;
-		this.taskMap["delete"](task);
-		task.fn.apply(task.context, task.args);
-
+			//!steal-remove-start
+			this._logFlush(task);
+			//!steal-remove-end
+			this.tasksRemaining--;
+			this.taskMap["delete"](task.fn);
+			task.fn.apply(task.context, task.args);
+		}
     }
 
 };
