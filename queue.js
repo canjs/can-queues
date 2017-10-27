@@ -1,11 +1,11 @@
 var queueState = require("./queue-state");
 var canDev = require('can-util/js/dev/dev');
 
-var noop = function() {};
+function noOperation() {};
 
 var Queue = function(name, callbacks) {
 	this.callbacks = Object.assign({
-		onFirstTask: noop,
+		onFirstTask: noOperation,
 		// default clears the last task
 		onComplete: function(){
 			queueState.lastTask = null;
@@ -16,18 +16,19 @@ var Queue = function(name, callbacks) {
 	this.tasks = [];
 	this._log = false;
 };
+Queue.noop = noOperation;
 Queue.prototype.enqueue = function(fn, context, args, meta) {
-	this.tasks.push({
+	var len = this.tasks.push({
 		fn: fn,
 		context: context,
 		args: args,
 		meta: meta || {}
 	});
 	//!steal-remove-start
-    this._logEnqueue(this.tasks[this.tasks.length - 1]);
+    this._logEnqueue(this.tasks[len - 1]);
 	//!steal-remove-end
 
-	if (this.tasks.length === 1) {
+	if (len === 1) {
 		this.callbacks.onFirstTask(this);
 	}
 };
