@@ -46,7 +46,7 @@ Queue.prototype._logEnqueue = function(task){
 
 Queue.prototype._logFlush = function(task){
     if(this._log === true || this._log === "flush") {
-        var log = task.meta && task.meta.log ? task.meta.log : [task.fn.name, task];
+        var log = task.meta.log ? task.meta.log.concat(task) : [task.fn.name, task];
         canDev.log.apply(canDev, [this.name + " running  :"].concat(log));
     }
     queueState.lastTask = task;
