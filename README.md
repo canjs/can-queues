@@ -10,7 +10,7 @@ Exports an object with the following:
 	PriorityQueue, // The PriorityQueue type constructor
 	notifyQueue,   // A Queue used to tell objects that
 	               //    derive a value that they should be updated.
-	deriveQueue,   // A PriorityQueue used update values.
+	deriveQueue,   // A PriorityQueue used to update values.
 	domUIQueue,    // A Queue used for updating the DOM or other UI after
 	               //    state has settled, but before user tasks
 	mutateQueue,   // A Queue used to register tasks that might
@@ -21,7 +21,7 @@ Exports an object with the following:
 		stop       // A function used to begin flushing the NOTIFY_QUEUE.
 	},
 
-	enqueueByQueue // A helper function used to queue a bunch of tasks.
+	enqueueByQueue, // A helper function used to queue a bunch of tasks.
 
 	stack,
 
