@@ -57,7 +57,7 @@ Queue.prototype._logFlush = function ( task ) {
 //!steal-remove-end
 
 Queue.prototype.flush = function () {
-		while ( this.index < this.tasks.length ) {
+	while ( this.index < this.tasks.length ) {
 		var task = this.tasks[this.index++];
 		//!steal-remove-start
 		this._logFlush( task );

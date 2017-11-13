@@ -1,5 +1,5 @@
 @module {function} can-queues.constructors.priorityQueue PriorityQueue
-@parent can-queues.constructors
+@parent can-queues.constructors 1
 
 @description A queue that you can `enqueue` into (with priority) and `flush`
 
@@ -15,7 +15,7 @@ A PriorityQueue works just like a normal queue.  Except:
 @param {Object} [callbacks] Optional. An object containing callbacks `onFirstTask` and/or `onComplete`.
   - `onFirstTask` - is called when the first task is added to an empty queue
   - `onComplete` - is called when the queue is empty.
-@return {can-key-tree} An instance of `PriorityQueue`.
+@return {Object} An instance of `PriorityQueue`.
 
 ## priorityQueue.enqueue( fn, context, args, meta )
 

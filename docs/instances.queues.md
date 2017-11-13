@@ -35,7 +35,7 @@ This queue is flushed automatically when `notifyQueue` is emptied.
 
 ## domUIQueue
 
-A Queue used for updating the DOM or other UI after state has settled, but before user tasks.
+A CompletionQueue used for updating the DOM or other UI after state has settled, but before user tasks.
 
 When this queue is emptied (`onComplete`), it calls `flush()` on the `mutateQueue`.
 

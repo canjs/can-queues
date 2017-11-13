@@ -66,7 +66,7 @@ MUTATE_QUEUE = new Queue( "MUTATE", {
 var queues = {
 	Queue: Queue,
 	PriorityQueue: PriorityQueue,
-	// CompletionQueue: CompletionQueue,
+	CompletionQueue: CompletionQueue,
 	notifyQueue: NOTIFY_QUEUE,
 	deriveQueue: DERIVE_QUEUE,
 	domUIQueue: DOM_UI_QUEUE,

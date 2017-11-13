@@ -1,5 +1,5 @@
 @module {function} can-queues.constructors.queue Queue
-@parent can-queues.constructors
+@parent can-queues.constructors 0
 
 @description A basic FIFO queue that you can `enqueue` into and `flush`
 
@@ -11,7 +11,7 @@ Creates a queue instance.
 @param {Object} [callbacks] Optional. An object containing callbacks `onFirstTask` and/or `onComplete`.
   - `onFirstTask` - is called when the first task is added to an empty queue
   - `onComplete` - is called when the queue is empty.
-@return {can-key-tree} An instance of `Queue`.
+@return {Object} An instance of `Queue`.
 
 ## queue.enqueue( fn, context, args, meta )
 
@@ -29,4 +29,3 @@ queue.flush();
 ## queue.flush()
 
 Runs all tasks in the queue.
-

@@ -8,10 +8,11 @@ Exports an object with the following:
 {
 	Queue,         // The Queue type constructor
 	PriorityQueue, // The PriorityQueue type constructor
+	CompletionQueue, // The CompletionQueue type constructor
 	notifyQueue,   // A Queue used to tell objects that
 	               //    derive a value that they should be updated.
 	deriveQueue,   // A PriorityQueue used to update values.
-	domUIQueue,    // A Queue used for updating the DOM or other UI after
+	domUIQueue,    // A CompletionQueue used for updating the DOM or other UI after
 	               //    state has settled, but before user tasks
 	mutateQueue,   // A Queue used to register tasks that might
 	               //    update other values.
@@ -23,9 +24,12 @@ Exports an object with the following:
 
 	enqueueByQueue, // A helper function used to queue a bunch of tasks.
 
-	stack,
+  stack,       // A function that returns an array of all the queue
+               //    tasks up to this point of a flush for debugging.
+               //    Returns an empty array in production.
 
-	logStack
+  logStack     // A function that logs the result of `this.stack()`.
+               //    Doesn't do anything in production.
 }
 ```
 
