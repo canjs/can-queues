@@ -1,5 +1,6 @@
-var queueState = require( "./queue-state" );
-var canDev = require( 'can-util/js/dev/dev' );
+var queueState = require("./queue-state");
+var canDev = require('can-log/dev/dev');
+
 
 function noOperation () {}
 
