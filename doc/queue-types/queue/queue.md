@@ -1,6 +1,6 @@
 @module {function} can-queues.Queue Queue
 @parent can-queues/types
-@group can-queues.Queue prototype
+@group can-queues.Queue.prototype prototype
 
 @description A basic FIFO queue that you can `enqueue` tasks into and `flush` enqueued tasks.
 
