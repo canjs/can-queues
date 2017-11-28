@@ -1,11 +1,11 @@
 var queueState = require("./queue-state");
 var canDev = require('can-log/dev/dev');
-
+var assign = require("can-assign");
 
 function noOperation () {}
 
 var Queue = function ( name, callbacks ) {
-	this.callbacks = Object.assign( {
+	this.callbacks = assign( {
 		onFirstTask: noOperation,
 		// default clears the last task
 		onComplete: function () {
@@ -17,6 +17,7 @@ var Queue = function ( name, callbacks ) {
 	this.tasks = [];
 	this._log = false;
 };
+
 Queue.prototype.constructor = Queue;
 
 Queue.noop = noOperation;
@@ -37,6 +38,7 @@ Queue.prototype.enqueue = function ( fn, context, args, meta ) {
 	}
 };
 
+//The following are removed in production.
 //!steal-remove-start
 Queue.prototype._logEnqueue = function ( task ) {
 	task.meta.stack = this;

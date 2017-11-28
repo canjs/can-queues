@@ -129,8 +129,12 @@ var queues = {
 	},
 	logStack: function () {
 		var stack = this.stack();
-		stack.forEach( function ( task ) {
-			var log = task.meta && task.meta.log ? task.meta.log : [task.fn.name, task];
+		stack.forEach( function ( task, i ) {
+			var meta = task.meta;
+			if( i === 0 && meta && meta.reasonLog) {
+				canDev.log.apply( canDev, meta.reasonLog);
+			}
+			var log = meta && meta.log ? meta.log : [task.fn.name, task];
 			canDev.log.apply( canDev, [task.meta.stack.name + " ran task:"].concat( log ));
 		});
 	},

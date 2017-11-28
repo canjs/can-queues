@@ -1,32 +1,6 @@
-@property {Helpers} can-queues.instances.helpers helpers
-@parent can-queues.instances
+@function can-queues.enqueueByQueue enqueueByQueue
+@parent can-queues/methods
 
-@description A set of helpers related to the instantiated queues.
-
-@type {Helpers}
-
-```js
-canQueues.batch.start();
-canQueues.batch.stop();
-canQueues.enqueueByQueue( fnByQueue, context, args, makeMeta, reasonLog );
-canQueues.stack();
-canQueues.logStack();
-```
-
-@body
-
-
-## batch.start()
-
-A function used to prevent the automatic flushing of `canQueues.notifyQueue`.
-
-
-## batch.stop()
-
-A function used to begin flushing `canQueues.notifyQueue`.
-
-
-## enqueueByQueue( ... )
 
 A helper function used to queue a bunch of tasks.
 
@@ -56,16 +30,3 @@ Params:
  * **args** {Array}: Optional. The arguments to `apply` to each task fn.
  * **makeMeta** {Function}: Optional. A function that takes ( `task`, `context`, `args` ) and returns an Object that will be the `meta` argument when the task is called.
  * **reasonLog** {Object}: Optional. A property attached to the `meta` object as `meta.reasonLog` before `task` is called.
-
-
-## stack()
-
-A function that returns an array of all the instance queue tasks that ran up to this point during a flush for debugging.
-
-The stack spans all 4 instance queues so it will show which tasks from which queues executed in what order during the flush up to that point.
-
-Returns an empty array in production.
-
-## logStack()
-
-Logs the return value of `this.stack()`. Extremely useful in debugging during a flush.

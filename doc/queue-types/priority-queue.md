@@ -1,5 +1,5 @@
-@module {function} can-queues.constructors.priorityQueue PriorityQueue
-@parent can-queues.constructors 1
+@module {function} can-queues.PriorityQueue PriorityQueue
+@parent can-queues/types
 
 @description A queue that you can `enqueue` into (with priority) and `flush`
 

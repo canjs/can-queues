@@ -1,5 +1,5 @@
-@module {function} can-queues.constructors.completionQueue CompletionQueue
-@parent can-queues.constructors 2
+@property {function} can-queues.CompletionQueue CompletionQueue
+@parent can-queues/types
 
 @description A basic FIFO queue that you can `enqueue` into and `flush`. Cannot be flushed while flushing.
 
