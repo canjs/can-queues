@@ -7,11 +7,16 @@
 
 Enqueues the `fn` function to be called with `context` as `this` and `args` as its arguments.
 
- ```js
- queue.enqueue(console.log, console, ["say hi"], {});
- queue.flush();
- // console.logs "say hi"
- ```
+```js
+queue.enqueue(console.log, console, ["say hi"], {});
+queue.flush();
+// console.logs "say hi"
+```
+
+Tasks are enqueued at the end of the queue.  If the queue's tasks are currently
+being flushed, new tasks added will be run without needing to call `.flush`.
+
+When the first task is enqueued, the `onFirstTask` callback is called.
 
 @param {function} fn The function to be called.
 @param {Any} context The `this` the function is called with.

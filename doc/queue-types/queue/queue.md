@@ -6,7 +6,7 @@
 
 @signature `new Queue(name [, callbacks])`
 
-Creates a queue instance.
+Creates a queue instance. 
 
 @param {String} [name] The name of the queue used for logging.
 @param {Object} [callbacks] Optional. An object containing callbacks `onFirstTask` and/or `onComplete`.

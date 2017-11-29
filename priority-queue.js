@@ -2,19 +2,39 @@ var Queue = require( "./queue" );
 
 var PriorityQueue = function () {
 	Queue.apply( this, arguments );
+	// A map of a task's function to the task for that function.
+	// This is so we can prevent duplicate functions from being enqueued
+	// and so `flushQueuedTask` can find the task and run it.
 	this.taskMap = new Map();
-	this.curPriorityIndex = Infinity;
-	this.curPriorityMax = 0;
+	// An "array-of-arrays"-ish data structure that stores
+	// each task organized by its priority.  Each object in this list
+	// looks like `{tasks: [...], index: 0}` where:
+	// - `tasks` - the tasks for a particular priority.
+	// - `index` - the index of the task waiting to be prioritized.
 	this.taskContainersByPriority = [];
+
+	// The index within `taskContainersByPriority` of the first `taskContainer`
+	// which has tasks that have not been run.
+	this.curPriorityIndex = Infinity;
+	// The index within `taskContainersByPriority` of the last `taskContainer`
+	// which has tasks that have not been run.
+	this.curPriorityMax = 0;
+
 	this.isFlushing = false;
+
+	// Manage the number of tasks remaining to keep
+	// this lookup fast.
 	this.tasksRemaining = 0;
 };
 PriorityQueue.prototype = Object.create( Queue.prototype );
 PriorityQueue.prototype.constructor = PriorityQueue;
 
 PriorityQueue.prototype.enqueue = function ( fn, context, args, meta ) {
+	// Only allow the enqueing of a given function once.
 	if ( !this.taskMap.has( fn ) ) {
+
 		this.tasksRemaining++;
+
 		var isFirst = this.taskContainersByPriority.length === 0;
 
 		var task = {
@@ -38,25 +58,43 @@ PriorityQueue.prototype.enqueue = function ( fn, context, args, meta ) {
 	}
 };
 
-PriorityQueue.prototype.isEnqueued = function ( fn ) {
-	return this.taskMap.has( fn );
+// Given a task, updates the queue's cursors so that `flush`
+// will be able to run the task.
+PriorityQueue.prototype.getTaskContainerAndUpdateRange = function ( task ) {
+	var priority = task.meta.priority || 0;
+
+	if ( priority < this.curPriorityIndex ) {
+		this.curPriorityIndex = priority;
+	}
+
+	if ( priority > this.curPriorityMax ) {
+		this.curPriorityMax = priority;
+	}
+
+	var tcByPriority = this.taskContainersByPriority;
+	var taskContainer = tcByPriority[priority];
+	if ( !taskContainer ) {
+		taskContainer = tcByPriority[priority] = {tasks: [], index: 0};
+	}
+	return taskContainer;
 };
 
 PriorityQueue.prototype.flush = function () {
+	// Only allow one task to run at a time.
 	if ( this.isFlushing ) {
-		// only allow access at one time to this method.
-		// This is because when calling .update ... that compute should be only able
-		// to cause updates to other computes it directly reads.  It's possible that
-		// reading other computes could call `updateAndNotify` again.
-		// If we didn't return, it's possible that other computes could update unrelated to the
-		// execution flow of the current compute being updated.  This would be very unexpected.
 		return;
 	}
 	this.isFlushing = true;
 	while ( true ) {
+		// If the first prioritized taskContainer with tasks remaining
+		// is before the last prioritized taskContainer ...
 		if ( this.curPriorityIndex <= this.curPriorityMax ) {
 			var taskContainer = this.taskContainersByPriority[this.curPriorityIndex];
+
+			// If that task container actually has tasks remaining ...
 			if ( taskContainer && ( taskContainer.tasks.length > taskContainer.index ) ) {
+
+				// Run the task.
 				var task = taskContainer.tasks[taskContainer.index++];
 				//!steal-remove-start
 				this._logFlush( task );
@@ -64,10 +102,13 @@ PriorityQueue.prototype.flush = function () {
 				this.tasksRemaining--;
 				this.taskMap["delete"]( task.fn );
 				task.fn.apply( task.context, task.args );
+
 			} else {
+				// Otherwise, move to the next taskContainer.
 				this.curPriorityIndex++;
 			}
 		} else {
+			// Otherwise, reset the state for the next `.flush()`.
 			this.taskMap = new Map();
 			this.curPriorityIndex = Infinity;
 			this.curPriorityMax = 0;
@@ -77,6 +118,10 @@ PriorityQueue.prototype.flush = function () {
 			return;
 		}
 	}
+};
+
+PriorityQueue.prototype.isEnqueued = function ( fn ) {
+	return this.taskMap.has( fn );
 };
 
 PriorityQueue.prototype.flushQueuedTask = function ( fn ) {
@@ -97,25 +142,6 @@ PriorityQueue.prototype.flushQueuedTask = function ( fn ) {
 			task.fn.apply( task.context, task.args );
 		}
 	}
-};
-
-PriorityQueue.prototype.getTaskContainerAndUpdateRange = function ( task ) {
-	var priority = task.meta.priority || 0;
-
-	if ( priority < this.curPriorityIndex ) {
-		this.curPriorityIndex = priority;
-	}
-
-	if ( priority > this.curPriorityMax ) {
-		this.curPriorityMax = priority;
-	}
-
-	var tcByPriority = this.taskContainersByPriority;
-	if ( !tcByPriority[priority] ) {
-		tcByPriority[priority] = {tasks: [], index: 0};
-	}
-
-	return tcByPriority[priority];
 };
 
 PriorityQueue.prototype.tasksRemainingCount = function () {

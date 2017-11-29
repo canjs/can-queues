@@ -320,3 +320,6 @@ for debugging so it's generally more useful to only log when tasks are flushed w
 ```js
 queues.log("flush");
 ```
+
+
+## How it works

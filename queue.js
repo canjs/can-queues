@@ -38,6 +38,23 @@ Queue.prototype.enqueue = function ( fn, context, args, meta ) {
 	}
 };
 
+Queue.prototype.flush = function () {
+	while ( this.index < this.tasks.length ) {
+		var task = this.tasks[this.index++];
+		//!steal-remove-start
+		this._logFlush( task );
+		//!steal-remove-end
+		task.fn.apply( task.context, task.args );
+	}
+	this.index = 0;
+	this.tasks = [];
+	this.callbacks.onComplete( this );
+};
+
+Queue.prototype.log = function () {
+	this._log = arguments.length ? arguments[0] : true;
+};
+
 //The following are removed in production.
 //!steal-remove-start
 Queue.prototype._logEnqueue = function ( task ) {
@@ -58,22 +75,5 @@ Queue.prototype._logFlush = function ( task ) {
 	queueState.lastTask = task;
 };
 //!steal-remove-end
-
-Queue.prototype.flush = function () {
-	while ( this.index < this.tasks.length ) {
-		var task = this.tasks[this.index++];
-		//!steal-remove-start
-		this._logFlush( task );
-		//!steal-remove-end
-		task.fn.apply( task.context, task.args );
-	}
-	this.index = 0;
-	this.tasks = [];
-	this.callbacks.onComplete( this );
-};
-
-Queue.prototype.log = function () {
-	this._log = arguments.length ? arguments[0] : true;
-};
 
 module.exports = Queue;
