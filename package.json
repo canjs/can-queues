@@ -13,7 +13,7 @@
     "url": "http://donejs.com"
   },
   "scripts": {
-    "postpublish": "git push --tags && git push",
+    "postpublish": "git push --tags && git push && make",
     "testee": "testee test.html --browsers firefox",
     "test": "npm run jshint && npm run testee",
     "jshint": "jshint ./*.js --config",
