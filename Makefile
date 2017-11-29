@@ -4,8 +4,7 @@ publish-docs:
 	npm run docco
 	git add -f docs/
 	git fetch
-	git checkout origin/gh-pages
 	git commit -m "Publish docs"
-	git push -f git@github.com:canjs/can-queues gh-pages
+	git push -f origin gh-pages
 	git checkout -
 	git branch -D gh-pages
