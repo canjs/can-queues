@@ -5,61 +5,62 @@ var queueState = require( './queue-state' );
 var CompletionQueue = require( "./completion-queue" );
 var ns = require( "can-namespace" );
 
+// How many `batch.start` - `batch.stop` calls have been made.
 var batchStartCounter = 0;
-var addedNotifyTask = false;
+// If a task was added since the last flush caused by `batch.stop`.
+var addedTask = false;
+// If we are flushing due to a `batch.stop`.
 var isFlushing = false;
+
+// Legacy values for the old batchNum.
 var batchNum = 0;
 var batchData;
 
-var emptyObject = function () { return {}; };
+// Used by `.enqueueByQueue` to know the property names that might be passed.
+var queueNames = ["notify", "derive", "domUI", "mutate"];
+// Create all the queues so that when one is complete,
+// the next queue is flushed.
 var NOTIFY_QUEUE, DERIVE_QUEUE, DOM_UI_QUEUE, MUTATE_QUEUE;
 
 NOTIFY_QUEUE = new Queue( "NOTIFY", {
 	onComplete: function () {
-		// console.log( "NOTIFY complete." )
 		DERIVE_QUEUE.flush();
 	},
 	onFirstTask: function () {
-		// console.log( "NOTIFY first task enqueued." )
+		// Flush right away if we aren't in a batch.
 		if ( !batchStartCounter ) {
 			NOTIFY_QUEUE.flush();
 		} else {
-			addedNotifyTask = true;
+			addedTask = true;
 		}
 	}
 });
 
 DERIVE_QUEUE = new PriorityQueue( "DERIVE", {
 	onComplete: function () {
-		// console.log( "DERIVE complete." )
 		DOM_UI_QUEUE.flush();
 	},
 	onFirstTask: function () {
-		// console.log( "DERIVE first task enqueued." )
-		addedNotifyTask = true;
+		addedTask = true;
 	}
 });
 
 DOM_UI_QUEUE = new CompletionQueue( "DOM_UI", {
 	onComplete: function () {
-		// console.log( "DERIVE complete." )
 		MUTATE_QUEUE.flush();
 	},
 	onFirstTask: function () {
-		// console.log( "DERIVE first task enqueued." )
-		addedNotifyTask = true;
+		addedTask = true;
 	}
 });
 
 MUTATE_QUEUE = new Queue( "MUTATE", {
 	onComplete: function () {
-		// console.log( "MUTATE complete." )
 		queueState.lastTask = null;
 		isFlushing = false;
 	},
 	onFirstTask: function () {
-		// console.log( "MUTATE first task enqueued." )
-		addedNotifyTask = true;
+		addedTask = true;
 	}
 });
 
@@ -82,47 +83,55 @@ var queues = {
 		stop: function () {
 			batchStartCounter--;
 			if ( batchStartCounter === 0 ) {
-				if ( addedNotifyTask ) {
-					addedNotifyTask = false;
+				if ( addedTask ) {
+					addedTask = false;
 					isFlushing = true;
 					NOTIFY_QUEUE.flush();
 				}
 			}
 		},
+		// Legacy method to return if we are between start and stop calls.
 		isCollecting: function () {
 			return batchStartCounter > 0;
 		},
+		// Legacy method provide a number for each batch.
 		number: function () {
 			return batchNum;
 		},
+		// Legacy method to provide batch information.
 		data: function () {
 			return batchData;
 		}
 	},
 	enqueueByQueue: function enqueueByQueue ( fnByQueue, context, args, makeMeta, reasonLog ) {
 		if ( fnByQueue ) {
-			makeMeta = makeMeta || emptyObject;
 			queues.batch.start();
-			["notify", "derive", "domUI", "mutate"].forEach( function ( queueName ) {
+			// For each queue, check if there are tasks for it.
+			queueNames.forEach( function ( queueName ) {
 				var name = queueName + "Queue";
 				var QUEUE = queues[name];
 				var tasks = fnByQueue[queueName];
 				if ( tasks !== undefined ) {
-					tasks.forEach( function ( handler ) {
-						var meta = makeMeta && makeMeta( handler, context, args );
+					// For each task function, setup the meta and enqueue it.
+					tasks.forEach( function ( fn ) {
+						var meta = makeMeta !== undefined ? makeMeta( fn, context, args ) : {};
 						meta.reasonLog = reasonLog;
-						QUEUE.enqueue( handler, context, args, meta );
+						QUEUE.enqueue( fn, context, args, meta );
 					});
 				}
 			});
 			queues.batch.stop();
 		}
 	},
+	// Currently an internal method that provides the task stack.
+	// Returns an array with the first task as the first item.
 	stack: function () {
 		var current = queueState.lastTask;
 		var stack = [];
 		while ( current ) {
 			stack.unshift( current );
+			// Queue.prototype._logEnqueue ensures
+			// that the `parentTask` is always set.
 			current = current.meta.parentTask;
 		}
 		return stack;
@@ -138,9 +147,14 @@ var queues = {
 			canDev.log.apply( canDev, [task.meta.stack.name + " ran task:"].concat( log ));
 		});
 	},
+	// A method that is not used.  It should return the number of tasks
+	// remaining, but doesn't seem to actually work.
 	taskCount: function () {
+		console.warn("THIS IS NOT USED RIGHT?");
 		return NOTIFY_QUEUE.tasks.length + DERIVE_QUEUE.tasks.length + DOM_UI_QUEUE.tasks.length + MUTATE_QUEUE.tasks.length;
 	},
+	// A shortcut for flushign the notify queue.  `batch.start` and `batch.stop` should be
+	// used instead.
 	flush: function () {
 		NOTIFY_QUEUE.flush();
 	},

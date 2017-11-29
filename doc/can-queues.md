@@ -323,3 +323,14 @@ queues.log("flush");
 
 
 ## How it works
+
+`can-queues` works by first creating the [queue-state.js](https://canjs.github.io/can-queues/docs/queue-state.html)
+module that simply tracks the `lastTask` that has been executed. Queues update and use this state to provide [can-queues.logStack].
+
+Then, the different queues are created:
+
+- [queue.js](https://canjs.github.io/can-queues/docs/queue.html)
+- [completion-queue.js](https://canjs.github.io/can-queues/docs/completion-queue.html)
+- [priority-queue.js](https://canjs.github.io/can-queues/docs/priority-queue.html)
+
+[can-queues](https://canjs.github.io/can-queues/docs/can-queues.html) uses those queues to create the [can-queues.notifyQueue], [can-queues.deriveQueue], [can-queues.domUIQueue] and [can-queues.mutateQueue], wires them up so when one is done, the next is flushed. It also creates the `batch` and other methods.

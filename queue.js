@@ -7,7 +7,8 @@ function noOperation () {}
 var Queue = function ( name, callbacks ) {
 	this.callbacks = assign( {
 		onFirstTask: noOperation,
-		// default clears the last task
+		// The default behavior is to clear the lastTask state.
+		// This is overwritten by `can-queues.js`.
 		onComplete: function () {
 			queueState.lastTask = null;
 		}
@@ -58,20 +59,25 @@ Queue.prototype.log = function () {
 //The following are removed in production.
 //!steal-remove-start
 Queue.prototype._logEnqueue = function ( task ) {
-	task.meta.stack = this;
+	// For debugging, set the parentTask to the last
+	// run task.
 	task.meta.parentTask = queueState.lastTask;
+	// Also let the task know which stack it was run within.
+	task.meta.stack = this;
 
 	if ( this._log === true || this._log === "enqueue" ) {
 		var log = task.meta.log ? task.meta.log.concat( task ) : [task.fn.name, task];
 		canDev.log.apply( canDev, [this.name + " enqueuing:"].concat( log ));
 	}
 };
-
+// `_logFlush` MUST be called by all queues prior to flushing in
+// development.
 Queue.prototype._logFlush = function ( task ) {
 	if ( this._log === true || this._log === "flush" ) {
 		var log = task.meta.log ? task.meta.log.concat( task ) : [task.fn.name, task];
 		canDev.log.apply( canDev, [this.name + " running  :"].concat( log ));
 	}
+	// Update the state to mark this as the task that was run last.
 	queueState.lastTask = task;
 };
 //!steal-remove-end
