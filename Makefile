@@ -1,7 +1,7 @@
 publish-docs:
 	npm install --no-shrinkwrap
 	git checkout -b gh-pages
-	./node_modules/.bin/docco can-queues.js queue.js queue-state.js completion-queue.js priority-queue.js
+	npm run docco
 	git add -f docs/
 	git fetch
 	git checkout origin/gh-pages
