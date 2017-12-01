@@ -1,6 +1,6 @@
 {
   "name": "can-queues",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "A light weight JavaScript task queue",
   "homepage": "",
   "repository": {
