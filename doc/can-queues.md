@@ -75,7 +75,7 @@ var info = new Observation(() => {
     return person.name + " is "+person.age;
 });
 
-var canVote = new Observation( ()=> {
+var canVote = new Observation(()=> {
     return person.age >= 18;
 });
 ```
@@ -84,12 +84,12 @@ Now lets say we listened to when `info` and `canVote` changed and used the other
 to print a message:
 
 ```js
-info.on(function(newInfo){
-    console.log("info: "+newInfo+", canVote:" canVote.get() );
+info.on(function (newInfo) {
+    console.log("info: " + newInfo + ", canVote:" + canVote.get());
 });
 
-canVote.on(function(newCanVote){
-    console.log("canVote: "+newCanVote+", info: "+info.get());
+canVote.on(function (newCanVote) {
+    console.log("canVote: " + newCanVote + ", info: " + info.get());
 });
 ```
 
@@ -221,14 +221,14 @@ on.  Lets see a brief example where we:
 ```js
 var person = new observe.Object({name: "Fran", age: 15});
 
-var info = new Observation(function updateInfo(){
-    return person.name + " is "+person.age;
+var info = new Observation(function updateInfo () {
+    return person.name + " is " + person.age;
 });
 
 var frag = stache("<h2>{{info}}</h2>")({info: info});
 document.body.appendChild(frag);
 
-person.on("age",function logAgeChanged(newVal){
+person.on("age", function logAgeChanged (newVal) {
     console.log("Age changed to ", newVal);
 });
 
@@ -266,11 +266,11 @@ Consider the following code that derives an `info` value from the `person` obser
 ```js
 var person = new observe.Object({name: "Fran", age: 15});
 
-var info = new Observation(function updateInfo(){
+var info = new Observation(function updateInfo () {
     return person.name + " is "+person.age;
 });
 
-info.on(function onInfoChanged(newVal){
+info.on(function onInfoChanged (newVal) {
     console.log("info changed");
 })
 
