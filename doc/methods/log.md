@@ -49,10 +49,10 @@ prior to `person.age` being set, the following would be logged:
 
 
 <pre>
-NOTIFY enqueuing: Observation<updateInfo>.onDependencyChange &#x25B6; { ... }
-NOTIFY running  : Observation<updateInfo>.onDependencyChange &#x25B6; { ... }
-DERIVE enqueuing: Observation<updateInfo>.update &#x25B6; { ... }
-DERIVE running  : Observation<updateInfo>.update &#x25B6; { ... }
+NOTIFY enqueuing: Observation&lt;updateInfo&gt;.onDependencyChange &#x25B6; { ... }
+NOTIFY running  : Observation&lt;updateInfo&gt;.onDependencyChange &#x25B6; { ... }
+DERIVE enqueuing: Observation&lt;updateInfo&gt;.update &#x25B6; { ... }
+DERIVE running  : Observation&lt;updateInfo&gt;.update &#x25B6; { ... }
 MUTATE enqueuing: onInfoChanged &#x25B6; { ... }
 MUTATE running  : onInfoChanged &#x25B6; { ... }
 </pre>
