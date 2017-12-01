@@ -114,7 +114,7 @@ var queues = {
 				if ( tasks !== undefined ) {
 					// For each task function, setup the meta and enqueue it.
 					tasks.forEach( function ( fn ) {
-						var meta = makeMeta !== undefined ? makeMeta( fn, context, args ) : {};
+						var meta = makeMeta != null ? makeMeta( fn, context, args ) : {};
 						meta.reasonLog = reasonLog;
 						QUEUE.enqueue( fn, context, args, meta );
 					});
