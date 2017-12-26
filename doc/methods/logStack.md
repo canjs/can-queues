@@ -81,3 +81,8 @@ is logged (shown as <code>&#x25B6; { ... }</code> above).  That object contains 
     meta    // Additional information about the task
 }
 ```
+
+
+The following video shows using `logStack`:
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/L0hR5ic_FvE" frameborder="0" gesture="media" allow="encrypted-media" allowfullscreen></iframe>

@@ -125,6 +125,15 @@ PriorityQueue.prototype.isEnqueued = function ( fn ) {
 };
 
 PriorityQueue.prototype.flushQueuedTask = function ( fn ) {
+	var task = this.dequeue(fn);
+	if(task) {
+		//!steal-remove-start
+		this._logFlush( task );
+		//!steal-remove-end
+		task.fn.apply( task.context, task.args );
+	}
+};
+PriorityQueue.prototype.dequeue = function(fn){
 	var task = this.taskMap.get( fn );
 	if ( task ) {
 		var priority = task.meta.priority || 0;
@@ -133,13 +142,11 @@ PriorityQueue.prototype.flushQueuedTask = function ( fn ) {
 
 		if ( index >= 0 ) {
 			taskContainer.tasks.splice( index, 1 );
-
-			//!steal-remove-start
-			this._logFlush( task );
-			//!steal-remove-end
 			this.tasksRemaining--;
 			this.taskMap["delete"]( task.fn );
-			task.fn.apply( task.context, task.args );
+			return task;
+		} else {
+			console.warn("Task", fn, "has already run");
 		}
 	}
 };

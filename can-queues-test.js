@@ -384,3 +384,18 @@ QUnit.test( "priority queue can't flush already ran task", function () {
 
 	QUnit.deepEqual( ran, ["1", "2", "3"] );
 });
+
+QUnit.test("dequeue a priority queue", 0, function(){
+	var queue = new queues.PriorityQueue( "priority" );
+
+	var task1 = function () {
+		QUnit.ok(false, "this should not be called");
+	};
+
+	queue.enqueue( task1, null, [], {
+		priority: 0
+	});
+	queue.dequeue(task1);
+
+	queue.flush();
+});
