@@ -399,3 +399,30 @@ QUnit.test("dequeue a priority queue", 0, function(){
 
 	queue.flush();
 });
+
+QUnit.test("by default tasks are in the Infinify priority", function(){
+	var queue = new queues.PriorityQueue("priority");
+
+	var order = 0;
+	var task1 = function(){
+		order++;
+		QUnit.equal(order, 1, "This ran first");
+	};
+	queue.enqueue(task1, null, [], { priority: 0 });
+
+	var task2 = function(){
+		order++;
+		QUnit.equal(order, 2, "This ran second");
+
+		var task3 = function(){
+			order++;
+			QUnit.equal(order, 3, "This ran third");
+		};
+		queue.enqueue(task3, null, [], { priority: 0 });
+	};
+	queue.enqueue(task2, null, []);
+
+	queue.flush();
+
+	QUnit.equal(order, 3, "There were three tasks ran");
+});
