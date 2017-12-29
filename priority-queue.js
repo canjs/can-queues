@@ -61,13 +61,13 @@ PriorityQueue.prototype.enqueue = function ( fn, context, args, meta ) {
 // Given a task, updates the queue's cursors so that `flush`
 // will be able to run the task.
 PriorityQueue.prototype.getTaskContainerAndUpdateRange = function ( task ) {
-	var priority = task.meta.priority || 0;
+	var priority = task.meta.priority != null ? task.meta.priority : Infinity;
 
 	if ( priority < this.curPriorityIndex ) {
 		this.curPriorityIndex = priority;
 	}
 
-	if ( priority > this.curPriorityMax ) {
+	if ( priority > this.curPriorityMax && priority !== Infinity ) {
 		this.curPriorityMax = priority;
 	}
 
@@ -88,11 +88,12 @@ PriorityQueue.prototype.flush = function () {
 	while ( true ) {
 		// If the first prioritized taskContainer with tasks remaining
 		// is before the last prioritized taskContainer ...
-		if ( this.curPriorityIndex <= this.curPriorityMax ) {
+		if ( this.curPriorityIndex <= this.curPriorityMax ||
+		 	(this.hasRemainingFor(Infinity) && (this.curPriorityIndex = Infinity))) {
 			var taskContainer = this.taskContainersByPriority[this.curPriorityIndex];
 
 			// If that task container actually has tasks remaining ...
-			if ( taskContainer && ( taskContainer.tasks.length > taskContainer.index ) ) {
+			if (this.hasRemainingFor(this.curPriorityIndex)) {
 
 				// Run the task.
 				var task = taskContainer.tasks[taskContainer.index++];
@@ -153,6 +154,11 @@ PriorityQueue.prototype.dequeue = function(fn){
 
 PriorityQueue.prototype.tasksRemainingCount = function () {
 	return this.tasksRemaining;
+};
+
+PriorityQueue.prototype.hasRemainingFor = function(priority) {
+	var taskContainer = this.taskContainersByPriority[priority];
+	return taskContainer && ( taskContainer.tasks.length > taskContainer.index );
 };
 
 module.exports = PriorityQueue;
