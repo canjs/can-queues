@@ -59,13 +59,13 @@ the calling of a function, usually a callback function within an event binding.
 There are two main reasons tasks are ordered:
 
 - __performance__ - It can be beneficial to order some tasks to happen at the same time. For example, those
-  that change the DOM.
+  that change the DOM. CanJS performs all DOM mutations together in the DOMUI queue. This helps avoid expensive browser layout reflows. Read [On Layout & Web Performance](http://kellegous.com/j/2013/01/26/layout-performance/) for background on why browser layout reflows hurts performance.  
 - __determinism__ - Ordering tasks can provide assurances about the state of an application at a particular
 point in time.
 
-Lets explore the __determinism__ use case a bit more with a
+Let's explore the __determinism__ use case a bit more with a
 small example to shows what a lack of __determinism__ would look like.  In the following example,
-`person` observable is created, with two observation's that derive values from its
+`person` observable is created, with two observations that derive values from its
 values:
 
 ```js
@@ -80,7 +80,7 @@ var canVote = new Observation(()=> {
 });
 ```
 
-Now lets say we listened to when `info` and `canVote` changed and used the other value
+Now let's say we listened to when `info` and `canVote` changed and used the other value
 to print a message:
 
 ```js
