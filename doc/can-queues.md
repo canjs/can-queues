@@ -42,7 +42,7 @@ methods.  The following describes the properties of the `can-queues` object:
                  // tasks up to this point of a flush for debugging.
                  // Returns an empty array in production.
 
-  logStack       // A function that logs the result of `this.stack()`.
+  logStack,      // A function that logs the result of `this.stack()`.
                  // Doesn't do anything in production.
 
   log            // Logs tasks as they are enqueued and/or run.
@@ -72,10 +72,10 @@ values:
 var person = observe({name: "Fran", age: 15});
 
 var info = new Observation(() => {
-    return person.name + " is "+person.age;
+    return person.name + " is " + person.age;
 });
 
-var canVote = new Observation(()=> {
+var canVote = new Observation(() => {
     return person.age >= 18;
 });
 ```
@@ -172,7 +172,7 @@ When enqueuing tasks, to assist with debugging, __PLEASE__:
   ```js
   //!steal-remove-start
   Object.defineProperty(this.update, "name", {
-	value: canReflect.getName(this) + ".update"
+	  value: canReflect.getName(this) + ".update"
   })
   //!steal-remove-end
   ```
@@ -293,9 +293,9 @@ is logged (shown as <code>&#x25B6; { ... }</code> above).  That object contains 
 
 ```js
 {
-    fn      // The function that was run
-    context // The context (`this`) the function was called on
-    args    // The arguments the function was passed
+    fn,      // The function that was run
+    context, // The context (`this`) the function was called on
+    args,    // The arguments the function was passed
     meta    // Additional information about the task
 }
 ```

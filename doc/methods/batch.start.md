@@ -40,7 +40,7 @@ class TodoList extends observe.Array {
         return this.filter((todo) => {
           return todo.complete === true;
       }).length
-    },
+    }
     completeAll(){
         queues.batch.start();
         this.forEach( (todo) => { todo.complete = true; } )

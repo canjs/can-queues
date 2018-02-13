@@ -13,9 +13,11 @@ code being executed.
 It is often used in conjunction with a debugger, as a replacement for the browser's developer tool's stack.
 
 ```js
-someMethodThatIDontKnowWhyItsRunning: function(){
-    queues.logStack();
-    debugger;
+{
+	someMethodThatIDontKnowWhyItsRunning: function(){
+	    queues.logStack();
+	    debugger;
+	}
 }
 ```
 
@@ -75,10 +77,10 @@ is logged (shown as <code>&#x25B6; { ... }</code> above).  That object contains 
 
 ```js
 {
-    fn      // The function that was run
-    context // The context (`this`) the function was called on
-    args    // The arguments the function was passed
-    meta    // Additional information about the task
+    fn,      // The function that was run
+    context, // The context (`this`) the function was called on
+    args,    // The arguments the function was passed
+    meta,    // Additional information about the task
 }
 ```
 
