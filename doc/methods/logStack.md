@@ -12,12 +12,12 @@ code being executed.
 
 It is often used in conjunction with a debugger, as a replacement for the browser's developer tool's stack.
 
-```js
+```javascript
 {
-	someMethodThatIDontKnowWhyItsRunning: function(){
-	    queues.logStack();
-	    debugger;
-	}
+  someMethodThatIDontKnowWhyItsRunning: function(){
+      queues.logStack();
+      debugger;
+  }
 }
 ```
 
@@ -35,22 +35,22 @@ that represent the actions CanJS is taken in a more sense-able representation.
 To use `.logStack()` it's typically a good idea to reference it from the window so it can be called at
 any time.  The easiest way to do this is to expose [can-namespace] as follows:
 
-```js
+```javascript
 window.can = require("can-namespace");
 ```
 
 Now, `logStack` should be available at any time with:
 
-```js
+```javascript
 can.queues.logStack();
 ```
 
 Consider the following code that derives an `info` value from the `person` observable:
 
-```js
-var person = new observe.Object({name: "Fran", age: 15});
+```javascript
+const person = new observe.Object({name: "Fran", age: 15});
 
-var info = new Observation(function updateInfo(){
+const info = new Observation(function updateInfo(){
     return person.name + " is "+person.age;
 });
 
@@ -75,7 +75,7 @@ MUTATE ran task: onInfoChanged &#x25B6; { ... }
 each task and the queue it ran in is logged.  You'll also notice that the task object itself
 is logged (shown as <code>&#x25B6; { ... }</code> above).  That object contains references to the following:
 
-```js
+```javascript
 {
     fn,      // The function that was run
     context, // The context (`this`) the function was called on

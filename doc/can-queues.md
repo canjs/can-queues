@@ -10,7 +10,7 @@
 @type {Object} The `can-queues` package exports an object with queue constructors, shared instances, and helpers
 methods.  The following describes the properties of the `can-queues` object:
 
-```js
+```javascript
 {
   Queue,           // The Queue type constructor
 
@@ -68,14 +68,14 @@ small example to shows what a lack of __determinism__ would look like.  In the f
 `person` observable is created, with two observations that derive values from its
 values:
 
-```js
-var person = observe({name: "Fran", age: 15});
+```javascript
+const person = observe({name: "Fran", age: 15});
 
-var info = new Observation(() => {
+const info = new Observation(() => {
     return person.name + " is " + person.age;
 });
 
-var canVote = new Observation(() => {
+const canVote = new Observation(() => {
     return person.age >= 18;
 });
 ```
@@ -83,7 +83,7 @@ var canVote = new Observation(() => {
 Now let's say we listened to when `info` and `canVote` changed and used the other value
 to print a message:
 
-```js
+```javascript
 info.on(function (newInfo) {
     console.log("info: " + newInfo + ", canVote:" + canVote.get());
 });
@@ -97,7 +97,7 @@ If `person.age` is set to `19`, `info` and `canVote`
 are each updated and their event handlers dispatched. If the updates to `info` and `canVote` immediately
 dispatched their events, you would see something like:
 
-```js
+```javascript
 person.age = 19;
 // console.log("info: Fran is 19, canVote: false")
 // console.log("info: Fran is 19, canVote: true")
@@ -126,7 +126,7 @@ Use `can-queues` enqueue and run tasks in one of the following queues:
 
 For example, the following enqueues and runs a `console.log("Hello World")` in the `mutateQueue`:
 
-```js
+```javascript
 import queues from "can-queues";
 
 queues.batch.start();
@@ -144,7 +144,7 @@ A `task` in `can-queues` is just:
 enqueued tasks.  [can-queues.batch.start] and [can-queues.batch.stop] can be nested and only fire
 when the number of `queues.batch.start()` calls equals the number of `queues.batch.stop()` calls.
 
-```js
+```javascript
 queues.batch.start();
 queues.batch.start();
 queues.batch.start();
@@ -157,7 +157,7 @@ queues.batch.stop(); //-> logs "say hi"
 The [can-queues.enqueueByQueue] helper can enqueue multiple tasks and starts and stops a batch.  For example,
 the following will log "running a task" in every queue.
 
-```js
+```javascript
 queues.enqueueByQueue({
     notify: [console.log],
     derive: [console.log],
@@ -169,26 +169,26 @@ queues.enqueueByQueue({
 When enqueuing tasks, to assist with debugging, __PLEASE__:
 
 - Give your functions useful names:
-  ```js
+  ```javascript
   //!steal-remove-start
   Object.defineProperty(this.update, "name", {
-	  value: canReflect.getName(this) + ".update"
+    value: canReflect.getName(this) + ".update"
   })
   //!steal-remove-end
   ```
 - Use the `reasonLog` (described in [can-queues.enqueueByQueue]'s documentation):
-  ```js
+  ```javascript
   queues.notifyQueue.enqueue(
-				this.update,
-				this,
-				[],
-				null
-				//!steal-remove-start
-				/* jshint laxcomma: true */
-				, [canReflect.getName(context), "changed"]
-				/* jshint laxcomma: false */
-				//!steal-remove-end
-			);
+        this.update,
+        this,
+        [],
+        null
+        //!steal-remove-start
+        /* jshint laxcomma: true */
+        , [canReflect.getName(context), "changed"]
+        /* jshint laxcomma: false */
+        //!steal-remove-end
+      );
   ```
 
 CanJS is much easier to debug if queued tasks can be easily traced to their source in meaningful ways.
@@ -218,14 +218,14 @@ on.  Lets see a brief example where we:
 - Update the DOM with the value of `info`,
 - Listen to changes in `age` and log the new value.
 
-```js
-var person = new observe.Object({name: "Fran", age: 15});
+```javascript
+const person = new observe.Object({name: "Fran", age: 15});
 
-var info = new Observation(function updateInfo () {
+const info = new Observation(function updateInfo () {
     return person.name + " is " + person.age;
 });
 
-var frag = stache("<h2>{{info}}</h2>")({info: info});
+const frag = stache("<h2>{{info}}</h2>")({info: info});
 document.body.appendChild(frag);
 
 person.on("age", function logAgeChanged (newVal) {
@@ -263,10 +263,10 @@ tasks.
 
 Consider the following code that derives an `info` value from the `person` observable:
 
-```js
-var person = new observe.Object({name: "Fran", age: 15});
+```javascript
+const person = new observe.Object({name: "Fran", age: 15});
 
-var info = new Observation(function updateInfo () {
+const info = new Observation(function updateInfo () {
     return person.name + " is "+person.age;
 });
 
@@ -291,7 +291,7 @@ MUTATE ran task: onInfoChanged &#x25B6; { ... }
 each task and the queue it ran in is logged.  You'll also notice that the task object itself
 is logged (shown as <code>&#x25B6; { ... }</code> above).  That object contains references to the following:
 
-```js
+```javascript
 {
     fn,      // The function that was run
     context, // The context (`this`) the function was called on
@@ -317,7 +317,7 @@ MUTATE running  : onInfoChanged &#x25B6; { ... }
 Typically, knowing when tasks are enqueued is not helpful
 for debugging so it's generally more useful to only log when tasks are flushed with:
 
-```js
+```javascript
 queues.log("flush");
 ```
 

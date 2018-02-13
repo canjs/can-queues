@@ -8,8 +8,8 @@
 `enqueueByQueue` is a helper that enqueues multiple tasks within queues at one time.  It assumes
 all tasks share the same `context` and `arguments`.
 
-```js
-var ran = [];
+```javascript
+const ran = [];
 
 canQueues.enqueueByQueue({
   "notify": [function notify () { ran.push( "notify" ); }],
@@ -40,8 +40,8 @@ all tasks have been enqueued.
 
 `enqueueByQueue` together with [can-key-tree] is used by many modules within CanJS to dispatch event handlers in their requested queues.  [can-key-tree] is used to organize event handlers by `key` and `queue` as follows:
 
-```js
-var observable = {
+```javascript
+const observable = {
     handlers: new KeyTree([Object, Object, Array]),
     [canSymbol.for("can.onKeyValue")]: function(key, handler, queue) {
         this.handlers.add([key, queue || "mutate", handler]);
@@ -49,24 +49,24 @@ var observable = {
     [canSymbol.for("can.offKeyValue")]: function(key, handler, queue) {
         this.handlers.delete([key, queue || "mutate", handler]);
     },
-    ...
-}
+    // ...
+};
 ```
 
 When a change happens to one of the keys, `enqueueByQueue` is useful for enqueueing those event handlers:
 
-```js
-var observable = {
-    ...
+```javascript
+const observable = {
+    // ...
     dispatch: function(key, newVal, oldVal) {
-        var fnByQueue = this.handlers.getNode([key]);
+        const fnByQueue = this.handlers.getNode([key]);
         queues.enqueueByQueue(fnByQueue,this,[newVal,oldVal], null
         //!steal-remove-start
         /* jshint laxcomma: true */
-		, [ canReflect.getName(this) + "'s", key, "changed to", newVal ],
+    , [ canReflect.getName(this) + "'s", key, "changed to", newVal ],
         /* jshint laxcomma: false */
-		//!steal-remove-end
+    //!steal-remove-end
         )
     }
-}
+};
 ```

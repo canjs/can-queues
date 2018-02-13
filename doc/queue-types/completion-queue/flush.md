@@ -13,7 +13,7 @@ If a CompletionQueue is currently flushing tasks, it prevents
 additional calls to flush from running tasks.  This makes it so each task function
 finishes running before others are started as demonstrated below:
 
- ```js
+ ```javascript
  queue.enqueue(function(){
      console.log("task 1 - start");
      queue.flush();

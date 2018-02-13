@@ -11,7 +11,7 @@ flushing them. Batching tasks can help improve performance.  Read on below for m
 `batch.start` increments an internal `batchStartCounter`.  [can-queues.batch.stop] decrements
 it. Once the counter is 0, the [can-queues.notifyQueue] and subsequent queues will be flushed.
 
-```js
+```javascript
 queues.batch.start();
 queues.batch.start();
 queues.notifyQueue(console.log, console,["notify"]);
@@ -34,7 +34,7 @@ to update their values a single time for multiple changes.  For example, by wrap
 to the list with `batch.start` and `batch.stop` the `completeCount` property of the list only updates
 once:
 
-```js
+```javascript
 class TodoList extends observe.Array {
     get completeCount() {
         return this.filter((todo) => {
@@ -47,7 +47,7 @@ class TodoList extends observe.Array {
         queues.batch.stop();
     }
 }
-var todos = new TodoList([{complete: false, complete: false}]);
+const todos = new TodoList([{complete: false, complete: false}]);
 
 todos.on("completeCount", function(completeCount){
     console.log("completeCount is ",completeCount);

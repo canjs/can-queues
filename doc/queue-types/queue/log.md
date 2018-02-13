@@ -9,7 +9,7 @@
 
  The following:
 
- ```js
+ ```javascript
  queue.log()
  queue.enqueue(console.log, console, ["say hi"], {});
  queue.flush();

@@ -11,7 +11,7 @@
 
 Calling `queues.log("flush")` is a useful tool for debugging.
 
-```js
+```javascript
 import queues from "can-queues";
 queues.log("flush");
 ```
@@ -28,10 +28,10 @@ queues.log("flush");
 
 Consider the following code that derives an `info` value from the `person` observable:
 
-```js
-var person = new observe.Object({name: "Fran", age: 15});
+```javascript
+const person = new observe.Object({name: "Fran", age: 15});
 
-var info = new Observation(function updateInfo(){
+const info = new Observation(function updateInfo(){
     return person.name + " is "+person.age;
 });
 
@@ -60,6 +60,6 @@ MUTATE running  : onInfoChanged &#x25B6; { ... }
 Typically, knowing when tasks are enqueued is not helpful
 for debugging so it's generally more useful to only log when tasks are flushed with:
 
-```js
+```javascript
 queues.log("flush");
 ```

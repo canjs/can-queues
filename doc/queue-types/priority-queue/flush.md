@@ -8,7 +8,7 @@
 Flushes tasks currently in the task queue based on `meta.priority`.  When complete, calls the `onComplete`
 callback.
 
-```js
+```javascript
 priorityQueue.enqueue(console.log, console, ["world"], { priority: 5 });
 priorityQueue.enqueue(console.log, console, ["hello"], { priority: 1 });
 priorityQueue.enqueue(console.log, console, ["!"], { priority: 7 });
@@ -23,7 +23,7 @@ If a PriorityQueue is currently flushing tasks, it prevents
 additional calls to flush from running tasks.  This makes it so each task function
 finishes running before others are started as demonstrated below:
 
- ```js
+ ```javascript
  queue.enqueue(function(){
      console.log("task 1 - start");
      queue.flush();

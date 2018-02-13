@@ -9,8 +9,8 @@ Sometimes, it's necessary for a task to be immediately invoked. For example, an 
 might depend on another observation currently in the queue. If this happens, the queued task can
 be run immediately.
 
-```js
-var task = function task(){ console.log("taskA") }
+```javascript
+const task = function task(){ console.log("taskA") };
 
 priorityQueue.enqueue(task, null, [],{priority: 5});
 priorityQueue.enqueue(function(){

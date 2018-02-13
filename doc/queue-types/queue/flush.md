@@ -8,7 +8,7 @@
 Flushes tasks currently in the task queue.  When complete, calls the `onComplete`
 callback.
 
- ```js
+ ```javascript
  queue.enqueue(console.log, console, ["say hi"], {});
  queue.flush();
  // console.logs "say hi"

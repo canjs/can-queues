@@ -4,25 +4,25 @@
 
 Exports an object with the following:
 
-```js
+```javascript
 {
-	Queue,         // The Queue type constructor
-	PriorityQueue, // The PriorityQueue type constructor
-	CompletionQueue, // The CompletionQueue type constructor
-	notifyQueue,   // A Queue used to tell objects that
-	               //    derive a value that they should be updated.
-	deriveQueue,   // A PriorityQueue used to update values.
-	domUIQueue,    // A CompletionQueue used for updating the DOM or other UI after
-	               //    state has settled, but before user tasks
-	mutateQueue,   // A Queue used to register tasks that might
-	               //    update other values.
-	batch: {
-		start,     // A function used to prevent the automatic flushing
-		           //    of the NOTIFY_QUEUE.
-		stop       // A function used to begin flushing the NOTIFY_QUEUE.
-	},
+  Queue,         // The Queue type constructor
+  PriorityQueue, // The PriorityQueue type constructor
+  CompletionQueue, // The CompletionQueue type constructor
+  notifyQueue,   // A Queue used to tell objects that
+                 //    derive a value that they should be updated.
+  deriveQueue,   // A PriorityQueue used to update values.
+  domUIQueue,    // A CompletionQueue used for updating the DOM or other UI after
+                 //    state has settled, but before user tasks
+  mutateQueue,   // A Queue used to register tasks that might
+                 //    update other values.
+  batch: {
+    start,     // A function used to prevent the automatic flushing
+               //    of the NOTIFY_QUEUE.
+    stop       // A function used to begin flushing the NOTIFY_QUEUE.
+  },
 
-	enqueueByQueue, // A helper function used to queue a bunch of tasks.
+  enqueueByQueue, // A helper function used to queue a bunch of tasks.
 
   stack,       // A function that returns an array of all the queue
                //    tasks up to this point of a flush for debugging.
@@ -38,38 +38,38 @@ Exports an object with the following:
 If you want to implement an observable that complies with `can-reflect`, and lets people
 listen to events with `.on`, you'll want the following:
 
-```js
-var canSymbol = require("can-symbol");
-var queues = require("can-queues");
+```javascript
+import canSymbol from "can-symbol";
+import queues from "can-queues";
 
-var observable = {
-	_cid: 123142123123,
-	value: undefined,
-	handlers: {
-		notify: [], mutate: []
-	},
-	[canSymbol.getKeyValue('can.onValue')]: function(handler, queueName) {
-		// save handlers by their queue
-		this.handlers[queueName].push(handler);
-	},
-	on: function(handler) {
-		// these handlers should always run last because they might mutate
-		this.handlers.mutate.push(handler);
-	},
-	[canSymbol.getKeyValue('can.setKeyValue')]: function(newValue) {
-		var args = [newValue, this.value]
-		this.value = newValue;
-		// start a batch so we don't .flush() the NOTIFY_QUEUE until everything has been added
-		queues.batch.start();
-		this.handlers.notify.forEach((handler) => {
-			queues.notifyQueue.enqueue(handler, this, args, {log: [handler.name+" by "+this._cid]});
-		})
-		this.handlers.mutate.forEach((handler) => {
-			queues.mutateQueue.enqueue(handler, this, args, {log: [handler.name+" by "+this._cid]});
-		})
-		queues.batch.stop();
-	}
-}
+const observable = {
+  _cid: 123142123123,
+  value: undefined,
+  handlers: {
+    notify: [], mutate: []
+  },
+  [canSymbol.getKeyValue('can.onValue')]: function(handler, queueName) {
+    // save handlers by their queue
+    this.handlers[queueName].push(handler);
+  },
+  on: function(handler) {
+    // these handlers should always run last because they might mutate
+    this.handlers.mutate.push(handler);
+  },
+  [canSymbol.getKeyValue('can.setKeyValue')]: function(newValue) {
+    const args = [newValue, this.value];
+    this.value = newValue;
+    // start a batch so we don't .flush() the NOTIFY_QUEUE until everything has been added
+    queues.batch.start();
+    this.handlers.notify.forEach((handler) => {
+      queues.notifyQueue.enqueue(handler, this, args, {log: [handler.name+" by "+this._cid]});
+    })
+    this.handlers.mutate.forEach((handler) => {
+      queues.mutateQueue.enqueue(handler, this, args, {log: [handler.name+" by "+this._cid]});
+    })
+    queues.batch.stop();
+  }
+};
 ```
 
 ## API
@@ -86,7 +86,7 @@ Creates a queue instance.
 
 Enqueues the `fn` function to be called with `context` as `this` and `args` as its arguments.
 
-```js
+```javascript
 // console.logs "say hi"
 queue.enqueue(console.log, console, ["say hi"], {});
 queue.flush();
