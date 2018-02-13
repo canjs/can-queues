@@ -9,10 +9,10 @@
 
  The following:
 
- ```javascript
- queue.log()
- queue.enqueue(console.log, console, ["say hi"], {});
- queue.flush();
+ ```js
+queue.log()
+queue.enqueue(console.log, console, ["say hi"], {});
+queue.flush();
  ```
 
  Logs:

@@ -7,7 +7,7 @@
 
 Enqueues the `fn` function to be called with `context` as `this` and `args` as its arguments.
 
-```javascript
+```js
 queue.enqueue(console.log, console, ["say hi"], {});
 queue.flush();
 // console.logs "say hi"

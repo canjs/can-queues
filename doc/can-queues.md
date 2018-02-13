@@ -10,42 +10,42 @@
 @type {Object} The `can-queues` package exports an object with queue constructors, shared instances, and helpers
 methods.  The following describes the properties of the `can-queues` object:
 
-```javascript
+```js
 {
-  Queue,           // The Queue type constructor
+	Queue,           // The Queue type constructor
 
-  PriorityQueue,   // The PriorityQueue type constructor
+	PriorityQueue,   // The PriorityQueue type constructor
 
-  CompletionQueue, // The CompletionQueue type constructor
+	CompletionQueue, // The CompletionQueue type constructor
 
-  notifyQueue,     // A Queue used to tell objects that
-                   // derive a value that they should be updated.
+	notifyQueue,     // A Queue used to tell objects that
+	// derive a value that they should be updated.
 
-  deriveQueue,     // A PriorityQueue used update values.
+	deriveQueue,     // A PriorityQueue used update values.
 
-  domUIQueue,      // A CompletionQueue used for updating the DOM or other
-                   // UI after state has settled, but before user tasks
+	domUIQueue,      // A CompletionQueue used for updating the DOM or other
+	// UI after state has settled, but before user tasks
 
-  mutateQueue,     // A Queue used to register tasks that might
-                   // update other values.
+	mutateQueue,     // A Queue used to register tasks that might
+	// update other values.
 
-  batch: {
-    start,     // A function used to prevent the automatic flushing
-               // of the NOTIFY_QUEUE.
+	batch: {
+		start,     // A function used to prevent the automatic flushing
+		// of the NOTIFY_QUEUE.
 
-    stop       // A function used to begin flushing the NOTIFY_QUEUE.
-  },
+		stop       // A function used to begin flushing the NOTIFY_QUEUE.
+	},
 
-  enqueueByQueue, // A helper function used to queue a bunch of tasks.
+	enqueueByQueue, // A helper function used to queue a bunch of tasks.
 
-  stack,         // A function that returns an array of all the queue
-                 // tasks up to this point of a flush for debugging.
-                 // Returns an empty array in production.
+	stack,         // A function that returns an array of all the queue
+	// tasks up to this point of a flush for debugging.
+	// Returns an empty array in production.
 
-  logStack,      // A function that logs the result of `this.stack()`.
-                 // Doesn't do anything in production.
+	logStack,      // A function that logs the result of `this.stack()`.
+	// Doesn't do anything in production.
 
-  log            // Logs tasks as they are enqueued and/or run.
+	log            // Logs tasks as they are enqueued and/or run.
 }
 ```
 
@@ -68,28 +68,28 @@ small example to shows what a lack of __determinism__ would look like.  In the f
 `person` observable is created, with two observations that derive values from its
 values:
 
-```javascript
+```js
 const person = observe({name: "Fran", age: 15});
 
 const info = new Observation(() => {
-    return person.name + " is " + person.age;
+	return person.name + " is " + person.age;
 });
 
 const canVote = new Observation(() => {
-    return person.age >= 18;
+	return person.age >= 18;
 });
 ```
 
 Now let's say we listened to when `info` and `canVote` changed and used the other value
 to print a message:
 
-```javascript
+```js
 info.on(function (newInfo) {
-    console.log("info: " + newInfo + ", canVote:" + canVote.get());
+	console.log("info: " + newInfo + ", canVote:" + canVote.get());
 });
 
 canVote.on(function (newCanVote) {
-    console.log("canVote: " + newCanVote + ", info: " + info.get());
+	console.log("canVote: " + newCanVote + ", info: " + info.get());
 });
 ```
 
@@ -97,7 +97,7 @@ If `person.age` is set to `19`, `info` and `canVote`
 are each updated and their event handlers dispatched. If the updates to `info` and `canVote` immediately
 dispatched their events, you would see something like:
 
-```javascript
+```js
 person.age = 19;
 // console.log("info: Fran is 19, canVote: false")
 // console.log("info: Fran is 19, canVote: true")
@@ -126,7 +126,7 @@ Use `can-queues` enqueue and run tasks in one of the following queues:
 
 For example, the following enqueues and runs a `console.log("Hello World")` in the `mutateQueue`:
 
-```javascript
+```js
 import queues from "can-queues";
 
 queues.batch.start();
@@ -144,7 +144,7 @@ A `task` in `can-queues` is just:
 enqueued tasks.  [can-queues.batch.start] and [can-queues.batch.stop] can be nested and only fire
 when the number of `queues.batch.start()` calls equals the number of `queues.batch.stop()` calls.
 
-```javascript
+```js
 queues.batch.start();
 queues.batch.start();
 queues.batch.start();
@@ -157,38 +157,38 @@ queues.batch.stop(); //-> logs "say hi"
 The [can-queues.enqueueByQueue] helper can enqueue multiple tasks and starts and stops a batch.  For example,
 the following will log "running a task" in every queue.
 
-```javascript
+```js
 queues.enqueueByQueue({
-    notify: [console.log],
-    derive: [console.log],
-    domUI: [console.log],
-    mutate: [console.log]
+	notify: [console.log],
+	derive: [console.log],
+	domUI: [console.log],
+	mutate: [console.log]
 }, console, ["running a task"]);
 ```
 
 When enqueuing tasks, to assist with debugging, __PLEASE__:
 
 - Give your functions useful names:
-  ```javascript
-  //!steal-remove-start
-  Object.defineProperty(this.update, "name", {
-    value: canReflect.getName(this) + ".update"
-  })
-  //!steal-remove-end
+  ```js
+//!steal-remove-start
+Object.defineProperty(this.update, "name", {
+	value: canReflect.getName(this) + ".update"
+})
+//!steal-remove-end
   ```
 - Use the `reasonLog` (described in [can-queues.enqueueByQueue]'s documentation):
-  ```javascript
-  queues.notifyQueue.enqueue(
-        this.update,
-        this,
-        [],
-        null
-        //!steal-remove-start
-        /* jshint laxcomma: true */
-        , [canReflect.getName(context), "changed"]
-        /* jshint laxcomma: false */
-        //!steal-remove-end
-      );
+  ```js
+queues.notifyQueue.enqueue(
+	this.update,
+	this,
+	[],
+	null
+	//!steal-remove-start
+	/* jshint laxcomma: true */
+	, [canReflect.getName(context), "changed"]
+	/* jshint laxcomma: false */
+	//!steal-remove-end
+);
   ```
 
 CanJS is much easier to debug if queued tasks can be easily traced to their source in meaningful ways.
@@ -218,18 +218,18 @@ on.  Lets see a brief example where we:
 - Update the DOM with the value of `info`,
 - Listen to changes in `age` and log the new value.
 
-```javascript
+```js
 const person = new observe.Object({name: "Fran", age: 15});
 
 const info = new Observation(function updateInfo () {
-    return person.name + " is " + person.age;
+	return person.name + " is " + person.age;
 });
 
 const frag = stache("<h2>{{info}}</h2>")({info: info});
 document.body.appendChild(frag);
 
 person.on("age", function logAgeChanged (newVal) {
-    console.log("Age changed to ", newVal);
+	console.log("Age changed to ", newVal);
 });
 
 person.age = 22;
@@ -263,15 +263,15 @@ tasks.
 
 Consider the following code that derives an `info` value from the `person` observable:
 
-```javascript
+```js
 const person = new observe.Object({name: "Fran", age: 15});
 
 const info = new Observation(function updateInfo () {
-    return person.name + " is "+person.age;
+	return person.name + " is "+person.age;
 });
 
 info.on(function onInfoChanged (newVal) {
-    console.log("info changed");
+	console.log("info changed");
 })
 
 person.age = 22;
@@ -291,12 +291,12 @@ MUTATE ran task: onInfoChanged &#x25B6; { ... }
 each task and the queue it ran in is logged.  You'll also notice that the task object itself
 is logged (shown as <code>&#x25B6; { ... }</code> above).  That object contains references to the following:
 
-```javascript
+```js
 {
-    fn,      // The function that was run
-    context, // The context (`this`) the function was called on
-    args,    // The arguments the function was passed
-    meta    // Additional information about the task
+	fn,      // The function that was run
+	context, // The context (`this`) the function was called on
+	args,    // The arguments the function was passed
+	meta    // Additional information about the task
 }
 ```
 
@@ -317,7 +317,7 @@ MUTATE running  : onInfoChanged &#x25B6; { ... }
 Typically, knowing when tasks are enqueued is not helpful
 for debugging so it's generally more useful to only log when tasks are flushed with:
 
-```javascript
+```js
 queues.log("flush");
 ```
 

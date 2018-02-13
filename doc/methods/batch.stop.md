@@ -12,7 +12,7 @@ flushing them. Batching tasks can help improve performance.  Read [can-queues.ba
 [can-queues.batch.start] increments an internal `batchStartCounter`.  [can-queues.batch.stop] decrements
 it. Once the counter is 0, the [can-queues.notifyQueue] and subsequent queues will be flushed.
 
-```javascript
+```js
 queues.batch.start();
 queues.batch.start();
 queues.notifyQueue(console.log, console,["notify"]);
