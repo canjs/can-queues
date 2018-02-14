@@ -8,11 +8,12 @@
 Enqueues the `fn` function to be called with `context` as `this` and `args` as its arguments.
 
 ```js
-priorityQueue.enqueue(console.log, console, ["world"], { priority: 5 });
-priorityQueue.enqueue(console.log, console, ["hello"], { priority: 1 });
-priorityQueue.enqueue(console.log, console, ["!"], { priority: 7 });
+priorityQueue.enqueue( console.log, console, [ "world" ], { priority: 5 } );
+priorityQueue.enqueue( console.log, console, [ "hello" ], { priority: 1 } );
+priorityQueue.enqueue( console.log, console, [ "!" ], { priority: 7 } );
 
 priorityQueue.flush();
+
 // console.logs "hello"
 // console.logs "world"
 // console.logs "!"

@@ -10,14 +10,16 @@ might depend on another observation currently in the queue. If this happens, the
 be run immediately.
 
 ```js
-const task = function task(){ console.log("taskA") };
+const task = function task() {
+	console.log( "taskA" );
+};
 
-priorityQueue.enqueue(task, null, [],{priority: 5});
-priorityQueue.enqueue(function(){
-	console.log("taskB - start")
-	priorityQueue.flushQueuedTask(task);
-	console.log("taskB - end")
-}, null, [],{priority: 0});
+priorityQueue.enqueue( task, null, [], { priority: 5 } );
+priorityQueue.enqueue( function() {
+	console.log( "taskB - start" );
+	priorityQueue.flushQueuedTask( task );
+	console.log( "taskB - end" );
+}, null, [], { priority: 0 } );
 
 // Logs:
 //   taskB - start

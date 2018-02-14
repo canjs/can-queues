@@ -11,15 +11,25 @@ all tasks share the same `context` and `arguments`.
 ```js
 const ran = [];
 
-canQueues.enqueueByQueue({
-	"notify": [function notify () { ran.push( "notify" ); }],
+canQueues.enqueueByQueue( {
+	"notify": [ function notify() {
+		ran.push( "notify" );
+	} ],
 	"derive": [
-		function derive1 () { ran.push( "derive1" ); },
-		function derive2 () { ran.push( "derive2" ); }
+		function derive1() {
+			ran.push( "derive1" );
+		},
+		function derive2() {
+			ran.push( "derive2" );
+		}
 	],
-	"domUI": [function domUI () { ran.push( "domUI" ); }],
-	"mutate": [function domUI () { ran.push( "mutate" ); }]
-});
+	"domUI": [ function domUI() {
+		ran.push( "domUI" );
+	} ],
+	"mutate": [ function domUI() {
+		ran.push( "mutate" );
+	} ]
+} );
 
 console.log( ran ); // -> ["notify", "derive1", "derive2", "domUI", "mutate"]
 ```
@@ -42,13 +52,14 @@ all tasks have been enqueued.
 
 ```js
 const observable = {
-	handlers: new KeyTree([Object, Object, Array]),
-	[canSymbol.for("can.onKeyValue")]: function(key, handler, queue) {
-		this.handlers.add([key, queue || "mutate", handler]);
+	handlers: new KeyTree( [ Object, Object, Array ] ),
+	[ canSymbol.for( "can.onKeyValue" ) ]: function( key, handler, queue ) {
+		this.handlers.add( [ key, queue || "mutate", handler ] );
 	},
-	[canSymbol.for("can.offKeyValue")]: function(key, handler, queue) {
-		this.handlers.delete([key, queue || "mutate", handler]);
-	},
+	[ canSymbol.for( "can.offKeyValue" ) ]: function( key, handler, queue ) {
+		this.handlers.delete( [ key, queue || "mutate", handler ] );
+	}
+
 	// ...
 };
 ```
@@ -57,16 +68,18 @@ When a change happens to one of the keys, `enqueueByQueue` is useful for enqueue
 
 ```js
 const observable = {
+
 	// ...
-	dispatch: function(key, newVal, oldVal) {
-		const fnByQueue = this.handlers.getNode([key]);
-		queues.enqueueByQueue(fnByQueue,this,[newVal,oldVal], null
+	dispatch: function( key, newVal, oldVal ) {
+		const fnByQueue = this.handlers.getNode( [ key ] );
+		queues.enqueueByQueue( fnByQueue, this, [ newVal, oldVal ], null
+
 			//!steal-remove-start
 			/* jshint laxcomma: true */
-			, [ canReflect.getName(this) + "'s", key, "changed to", newVal ],
+			, [ canReflect.getName( this ) + "'s", key, "changed to", newVal ],
 			/* jshint laxcomma: false */
 			//!steal-remove-end
-		)
+		);
 	}
 };
 ```

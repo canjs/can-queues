@@ -10,10 +10,10 @@
  The following:
 
  ```js
-queue.log()
-queue.enqueue(console.log, console, ["say hi"], {});
+queue.log();
+queue.enqueue( console.log, console, [ "say hi" ], {} );
 queue.flush();
- ```
+```
 
  Logs:
 

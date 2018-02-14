@@ -48,25 +48,32 @@ const observable = {
 	handlers: {
 		notify: [], mutate: []
 	},
-	[canSymbol.getKeyValue('can.onValue')]: function(handler, queueName) {
+	[ canSymbol.getKeyValue( "can.onValue" ) ]: function( handler, queueName ) {
+
 		// save handlers by their queue
-		this.handlers[queueName].push(handler);
+		this.handlers[ queueName ].push( handler );
 	},
-	on: function(handler) {
+	on: function( handler ) {
+
 		// these handlers should always run last because they might mutate
-		this.handlers.mutate.push(handler);
+		this.handlers.mutate.push( handler );
 	},
-	[canSymbol.getKeyValue('can.setKeyValue')]: function(newValue) {
-		const args = [newValue, this.value];
+	[ canSymbol.getKeyValue( "can.setKeyValue" ) ]: function( newValue ) {
+		const args = [ newValue, this.value ];
 		this.value = newValue;
+
 		// start a batch so we don't .flush() the NOTIFY_QUEUE until everything has been added
 		queues.batch.start();
-		this.handlers.notify.forEach((handler) => {
-			queues.notifyQueue.enqueue(handler, this, args, {log: [handler.name+" by "+this._cid]});
-		})
-		this.handlers.mutate.forEach((handler) => {
-			queues.mutateQueue.enqueue(handler, this, args, {log: [handler.name+" by "+this._cid]});
-		})
+		this.handlers.notify.forEach( ( handler ) => {
+			queues.notifyQueue.enqueue( handler, this, args,
+				{ log: [ handler.name + " by " + this._cid ] }
+			);
+		} );
+		this.handlers.mutate.forEach( ( handler ) => {
+			queues.mutateQueue.enqueue( handler, this, args,
+				{ log: [ handler.name + " by " + this._cid ] }
+			);
+		} );
 		queues.batch.stop();
 	}
 };
@@ -88,7 +95,7 @@ Enqueues the `fn` function to be called with `context` as `this` and `args` as i
 
 ```js
 // console.logs "say hi"
-queue.enqueue(console.log, console, ["say hi"], {});
+queue.enqueue( console.log, console, [ "say hi" ], {} );
 queue.flush();
 ```
 
