@@ -13,9 +13,11 @@ code being executed.
 It is often used in conjunction with a debugger, as a replacement for the browser's developer tool's stack.
 
 ```js
-someMethodThatIDontKnowWhyItsRunning: function(){
-    queues.logStack();
-    debugger;
+{
+	someMethodThatIDontKnowWhyItsRunning: function() {
+		queues.logStack();
+		debugger;
+	}
 }
 ```
 
@@ -34,7 +36,7 @@ To use `.logStack()` it's typically a good idea to reference it from the window 
 any time.  The easiest way to do this is to expose [can-namespace] as follows:
 
 ```js
-window.can = require("can-namespace");
+window.can = require( "can-namespace" );
 ```
 
 Now, `logStack` should be available at any time with:
@@ -46,16 +48,16 @@ can.queues.logStack();
 Consider the following code that derives an `info` value from the `person` observable:
 
 ```js
-var person = new observe.Object({name: "Fran", age: 15});
+const person = new observe.Object( { name: "Fran", age: 15 } );
 
-var info = new Observation(function updateInfo(){
-    return person.name + " is "+person.age;
-});
+const info = new Observation( function updateInfo() {
+	return person.name + " is " + person.age;
+} );
 
-info.on(function onInfoChanged(newVal){
-    can.queues.logStack()
-    debugger;
-})
+info.on( function onInfoChanged( newVal ) {
+	can.queues.logStack();
+	debugger;
+} );
 
 person.age = 22;
 ```
@@ -75,10 +77,10 @@ is logged (shown as <code>&#x25B6; { ... }</code> above).  That object contains 
 
 ```js
 {
-    fn      // The function that was run
-    context // The context (`this`) the function was called on
-    args    // The arguments the function was passed
-    meta    // Additional information about the task
+	fn,      // The function that was run
+	context, // The context (`this`) the function was called on
+	args,    // The arguments the function was passed
+	meta    // Additional information about the task
 }
 ```
 

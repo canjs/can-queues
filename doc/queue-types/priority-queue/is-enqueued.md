@@ -13,10 +13,12 @@ might depend on another observation currently in the queue. If this happens, the
 be run immediately.
 
 ```js
-var task = function task(){ console.log("taskA") }
+const task = function task() {
+	console.log( "taskA" );
+};
 
-priorityQueue.enqueue(task, null, [],{priority: 5});
-priorityQueue.isEnqueued(task) //-> true
+priorityQueue.enqueue( task, null, [], { priority: 5 } );
+priorityQueue.isEnqueued( task ); //-> true
 ```
 
   @param {function} fn The function to to test if it is in the queue.

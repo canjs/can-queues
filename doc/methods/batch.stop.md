@@ -15,11 +15,12 @@ it. Once the counter is 0, the [can-queues.notifyQueue] and subsequent queues wi
 ```js
 queues.batch.start();
 queues.batch.start();
-queues.notifyQueue(console.log, console,["notify"]);
-queues.deriveQueue(console.log, console,["derive"]);
-queues.mutateQueue(console.log, console,["mutate"]);
+queues.notifyQueue( console.log, console, [ "notify" ] );
+queues.deriveQueue( console.log, console, [ "derive" ] );
+queues.mutateQueue( console.log, console, [ "mutate" ] );
 queues.batch.stop();
 queues.batch.stop();
+
 // Logs:
 //   notify
 //   derive

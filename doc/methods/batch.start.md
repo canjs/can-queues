@@ -14,11 +14,12 @@ it. Once the counter is 0, the [can-queues.notifyQueue] and subsequent queues wi
 ```js
 queues.batch.start();
 queues.batch.start();
-queues.notifyQueue(console.log, console,["notify"]);
-queues.deriveQueue(console.log, console,["derive"]);
-queues.mutateQueue(console.log, console,["mutate"]);
+queues.notifyQueue( console.log, console, [ "notify" ] );
+queues.deriveQueue( console.log, console, [ "derive" ] );
+queues.mutateQueue( console.log, console, [ "mutate" ] );
 queues.batch.stop();
 queues.batch.stop();
+
 // Logs:
 //   notify
 //   derive
@@ -36,25 +37,28 @@ once:
 
 ```js
 class TodoList extends observe.Array {
-    get completeCount() {
-        return this.filter((todo) => {
-          return todo.complete === true;
-      }).length
-    },
-    completeAll(){
-        queues.batch.start();
-        this.forEach( (todo) => { todo.complete = true; } )
-        queues.batch.stop();
-    }
+	get completeCount() {
+		return this.filter( ( todo ) => {
+			return todo.complete === true;
+		} ).length;
+	}
+	completeAll() {
+		queues.batch.start();
+		this.forEach( ( todo ) => {
+			todo.complete = true;
+		} );
+		queues.batch.stop();
+	}
 }
-var todos = new TodoList([{complete: false, complete: false}]);
+const todos = new TodoList( [ { complete: false, complete: false } ] );
 
-todos.on("completeCount", function(completeCount){
-    console.log("completeCount is ",completeCount);
-});
+todos.on( "completeCount", function( completeCount ) {
+	console.log( "completeCount is ", completeCount );
+} );
 
-todos.completeCount //-> 0
-todos.completeAll()
+todos.completeCount; //-> 0
+todos.completeAll();
+
 // Logs:
 //   completeCount is 2
 ```
