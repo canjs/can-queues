@@ -1,4 +1,4 @@
-var canDev = require( 'can-util/js/dev/dev' );
+var canDev = require( 'can-log/dev/dev' );
 var Queue = require( './queue' );
 var PriorityQueue = require( './priority-queue' );
 var queueState = require( './queue-state' );
@@ -150,7 +150,6 @@ var queues = {
 	// A method that is not used.  It should return the number of tasks
 	// remaining, but doesn't seem to actually work.
 	taskCount: function () {
-		console.warn("THIS IS NOT USED RIGHT?");
 		return NOTIFY_QUEUE.tasks.length + DERIVE_QUEUE.tasks.length + DOM_UI_QUEUE.tasks.length + MUTATE_QUEUE.tasks.length;
 	},
 	// A shortcut for flushign the notify queue.  `batch.start` and `batch.stop` should be

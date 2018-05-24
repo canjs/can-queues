@@ -1,6 +1,6 @@
 var QUnit = require( 'steal-qunit' );
 var queues = require( "can-queues" );
-var canDev = require( 'can-util/js/dev/dev' );
+var canDev = require( 'can-log/dev/dev' );
 var CompletionQueue = require( "./completion-queue" );
 
 QUnit.module( 'can-queues' );

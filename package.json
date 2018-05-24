@@ -40,8 +40,7 @@
   "dependencies": {
     "can-assign": "^1.0.1",
     "can-log": "^1.0.0",
-    "can-namespace": "^1.0.0",
-    "can-util": "^3.10.6"
+    "can-namespace": "^1.0.0"
   },
   "devDependencies": {
     "docco": "^0.7.0",
