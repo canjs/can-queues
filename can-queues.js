@@ -1,3 +1,4 @@
+"use strict";
 var canDev = require( 'can-log/dev/dev' );
 var Queue = require( './queue' );
 var PriorityQueue = require( './priority-queue' );
