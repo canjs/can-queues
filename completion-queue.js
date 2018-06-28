@@ -14,7 +14,9 @@ CompletionQueue.prototype.flush = function () {
 		while ( this.index < this.tasks.length ) {
 			var task = this.tasks[this.index++];
 			//!steal-remove-start
-			this._logFlush( task );
+			if (process.env.NODE_ENV !== 'production') {
+				this._logFlush( task );
+			}
 			//!steal-remove-end
 			task.fn.apply( task.context, task.args );
 		}

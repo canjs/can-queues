@@ -49,7 +49,9 @@ PriorityQueue.prototype.enqueue = function ( fn, context, args, meta ) {
 		this.taskMap.set( fn, task );
 
 		//!steal-remove-start
-		this._logEnqueue( task );
+		if(process.env.NODE_ENV !== 'production') {
+			this._logEnqueue( task );
+		}
 		//!steal-remove-end
 
 		if ( isFirst ) {
@@ -97,7 +99,9 @@ PriorityQueue.prototype.flush = function () {
 				// Run the task.
 				var task = taskContainer.tasks[taskContainer.index++];
 				//!steal-remove-start
-				this._logFlush( task );
+				if(process.env.NODE_ENV !== 'production') {
+					this._logFlush( task );
+				}
 				//!steal-remove-end
 				this.tasksRemaining--;
 				this.taskMap["delete"]( task.fn );
@@ -128,7 +132,9 @@ PriorityQueue.prototype.flushQueuedTask = function ( fn ) {
 	var task = this.dequeue(fn);
 	if(task) {
 		//!steal-remove-start
-		this._logFlush( task );
+		if(process.env.NODE_ENV !== 'production') {
+			this._logFlush( task );
+		}
 		//!steal-remove-end
 		task.fn.apply( task.context, task.args );
 	}

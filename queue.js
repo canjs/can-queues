@@ -31,7 +31,9 @@ Queue.prototype.enqueue = function ( fn, context, args, meta ) {
 		meta: meta || {}
 	});
 	//!steal-remove-start
-	this._logEnqueue( this.tasks[len - 1] );
+	if(process.env.NODE_ENV !== 'production') {
+		this._logEnqueue( this.tasks[len - 1] );
+	}
 	//!steal-remove-end
 
 	if ( len === 1 ) {
@@ -43,7 +45,10 @@ Queue.prototype.flush = function () {
 	while ( this.index < this.tasks.length ) {
 		var task = this.tasks[this.index++];
 		//!steal-remove-start
-		this._logFlush( task );
+		if(process.env.NODE_ENV !== 'production') {
+			this._logFlush( task );
+		}
+
 		//!steal-remove-end
 		task.fn.apply( task.context, task.args );
 	}
@@ -58,28 +63,30 @@ Queue.prototype.log = function () {
 
 //The following are removed in production.
 //!steal-remove-start
-Queue.prototype._logEnqueue = function ( task ) {
-	// For debugging, set the parentTask to the last
-	// run task.
-	task.meta.parentTask = queueState.lastTask;
-	// Also let the task know which stack it was run within.
-	task.meta.stack = this;
+if(process.env.NODE_ENV !== 'production') {
+	Queue.prototype._logEnqueue = function ( task ) {
+		// For debugging, set the parentTask to the last
+		// run task.
+		task.meta.parentTask = queueState.lastTask;
+		// Also let the task know which stack it was run within.
+		task.meta.stack = this;
 
-	if ( this._log === true || this._log === "enqueue" ) {
-		var log = task.meta.log ? task.meta.log.concat( task ) : [task.fn.name, task];
-		canDev.log.apply( canDev, [this.name + " enqueuing:"].concat( log ));
-	}
-};
-// `_logFlush` MUST be called by all queues prior to flushing in
-// development.
-Queue.prototype._logFlush = function ( task ) {
-	if ( this._log === true || this._log === "flush" ) {
-		var log = task.meta.log ? task.meta.log.concat( task ) : [task.fn.name, task];
-		canDev.log.apply( canDev, [this.name + " running  :"].concat( log ));
-	}
-	// Update the state to mark this as the task that was run last.
-	queueState.lastTask = task;
-};
+		if ( this._log === true || this._log === "enqueue" ) {
+			var log = task.meta.log ? task.meta.log.concat( task ) : [task.fn.name, task];
+			canDev.log.apply( canDev, [this.name + " enqueuing:"].concat( log ));
+		}
+	};
+	// `_logFlush` MUST be called by all queues prior to flushing in
+	// development.
+	Queue.prototype._logFlush = function ( task ) {
+		if ( this._log === true || this._log === "flush" ) {
+			var log = task.meta.log ? task.meta.log.concat( task ) : [task.fn.name, task];
+			canDev.log.apply( canDev, [this.name + " running  :"].concat( log ));
+		}
+		// Update the state to mark this as the task that was run last.
+		queueState.lastTask = task;
+	};
+}
 //!steal-remove-end
 
 module.exports = Queue;
