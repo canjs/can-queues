@@ -1,3 +1,4 @@
+"use strict";
 var queueState = require("./queue-state");
 var canDev = require('can-log/dev/dev');
 var assign = require("can-assign");

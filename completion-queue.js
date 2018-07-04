@@ -1,3 +1,4 @@
+"use strict";
 var Queue = require( "./queue" );
 
 // This queue does not allow another task to run until this one is complete
