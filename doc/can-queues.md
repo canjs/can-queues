@@ -171,16 +171,16 @@ When enqueuing tasks, to assist with debugging, __PLEASE__:
 
 - Give your functions useful names:
   ```js
-//!steal-remove-start
-Object.defineProperty( this.update, "name", {
-	value: canReflect.getName( this ) + ".update"
-} );
+  //!steal-remove-start
+  Object.defineProperty( this.update, "name", {
+  	value: canReflect.getName( this ) + ".update"
+  } );
 
-//!steal-remove-end
-```
+  //!steal-remove-end
+  ```
 - Use the `reasonLog` (described in [can-queues.enqueueByQueue]'s documentation):
   ```js
-queues.notifyQueue.enqueue(
+  queues.notifyQueue.enqueue(
 	this.update,
 	this,
 	[],
@@ -191,8 +191,8 @@ queues.notifyQueue.enqueue(
 	, [ canReflect.getName( context ), "changed" ]
 	/* jshint laxcomma: false */
 	//!steal-remove-end
-);
-```
+  );
+  ```
 
 CanJS is much easier to debug if queued tasks can be easily traced to their source in meaningful ways.
 
