@@ -158,11 +158,15 @@ if ( System.env.indexOf( 'production' ) < 0 ) {
 
 		canDev.log = function ( area, name ) {
 			QUnit.equal( "Test enqueuing:", area );
-			QUnit.equal( "fnName", name );
+			if (name) {
+				QUnit.equal( "fnName", name );
+			}
 
 			canDev.log = function ( area, name ) {
 				QUnit.equal( "Test running  :", area );
-				QUnit.equal( "fnName", name );
+				if (name) {
+					QUnit.equal( "fnName", name );
+				}
 			};
 		};
 
@@ -183,17 +187,28 @@ if ( System.env.indexOf( 'production' ) < 0 ) {
 			};
 		}
 
+		function setFnName(fn, fnName) {
+			if (!fn.name) {
+				fn.name = fnName;
+			}
+		}
+
 		var callbackOrder = [];
 		var map, fullName, mapFullName;
 
 		// var map = new DefineMap( {first: "Justin", last: "Meyer", fullName: ""}); //map:1
+
+		function derivedChild_queueUpdate () {
+			callbackOrder.push( "derivedChild_queueUpdate" );
+			fullName.queueUpdate();
+		}
+		setFnName(derivedChild_queueUpdate, 'derivedChild_queueUpdate');
+		
+
 		map = {
 			name: "map",
 			notifyHandlers: [
-				function derivedChild_queueUpdate () {
-					callbackOrder.push( "derivedChild_queueUpdate" );
-					fullName.queueUpdate();
-				}
+				derivedChild_queueUpdate
 			],
 			dispatch: function () {
 				callbackOrder.push( "map.dispatch" );
@@ -231,12 +246,18 @@ if ( System.env.indexOf( 'production' ) < 0 ) {
 			]
 		};
 
+		setFnName(fullName.queueUpdate, "queueUpdate");
+		setFnName(fullName.update, "update");
+		setFnName(fullName.mutateHandlers[0], 'fullName_setFullNameProperty');
+
+
+
 		mapFullName = {
 			name: "map.fullName",
 			mutateHandlers: [function mapFullName_handler () {
 				callbackOrder.push( "gc1_eventHandler_writableChild_dispatch" );
 				var stack = queues.stack();
-
+				setFnName(this.mutateHandlers[0], "mapFullName_handler");
 				QUnit.deepEqual( stack.map( function ( task ) {
 					return task.meta.stack.name + " " +task.context.name + " " +
 						task.fn.name;
