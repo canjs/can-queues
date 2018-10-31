@@ -4,7 +4,7 @@
 @description Log the tasks that were run that resulted in the current line of code
 being executed.
 
-@signature `queues.logStack( [type] )`
+@signature `queues.logStack()`
 
 `logStack()` is a very useful debugging tool for discovering why a particular piece of code
 was executed by CanJS. It logs to the developer console the tasks that resulted in the current line of

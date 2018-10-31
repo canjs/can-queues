@@ -104,6 +104,28 @@ var queues = {
 			return batchData;
 		}
 	},
+	runAsTask: function(fn, reasonLog){
+		//!steal-remove-start
+		if(process.env.NODE_ENV !== 'production') {
+			return function(){
+				queueState.lastTask = {
+					fn: fn,
+					context: this,
+					args: arguments,
+					meta: {
+						reasonLog: typeof reasonLog === "function" ? reasonLog.apply(this, arguments): reasonLog,
+						parentTask: queueState.lastTask,
+						stack: {name: "RUN_AS"}
+					}
+				};
+				var ret = fn.apply(this, arguments);
+				queueState.lastTask = queueState.lastTask && queueState.lastTask.meta.parentTask;
+				return ret;
+			};
+		}
+		//!steal-remove-end
+		return fn;
+	},
 	enqueueByQueue: function enqueueByQueue ( fnByQueue, context, args, makeMeta, reasonLog ) {
 		if ( fnByQueue ) {
 			queues.batch.start();
@@ -124,10 +146,13 @@ var queues = {
 			queues.batch.stop();
 		}
 	},
+	lastTask: function(){
+		return queueState.lastTask;
+	},
 	// Currently an internal method that provides the task stack.
 	// Returns an array with the first task as the first item.
-	stack: function () {
-		var current = queueState.lastTask;
+	stack: function (task) {
+		var current = task || queueState.lastTask;
 		var stack = [];
 		while ( current ) {
 			stack.unshift( current );
@@ -137,8 +162,8 @@ var queues = {
 		}
 		return stack;
 	},
-	logStack: function () {
-		var stack = this.stack();
+	logStack: function (task) {
+		var stack = this.stack(task);
 		stack.forEach( function ( task, i ) {
 			var meta = task.meta;
 			if( i === 0 && meta && meta.reasonLog) {

@@ -203,7 +203,7 @@ if ( System.env.indexOf( 'production' ) < 0 ) {
 			fullName.queueUpdate();
 		}
 		setFnName(derivedChild_queueUpdate, 'derivedChild_queueUpdate');
-		
+
 
 		map = {
 			name: "map",
@@ -419,4 +419,66 @@ QUnit.test("dequeue a priority queue", 0, function(){
 	queue.dequeue(task1);
 
 	queue.flush();
+});
+
+QUnit.test(".lastTask()", function(){
+	function notify () {
+		var lastTask = queues.lastTask();
+		QUnit.equal(lastTask.fn,notify);
+	}
+	queues.enqueueByQueue({
+		"notify": [notify],
+	});
+
+});
+
+QUnit.test(".stack(lastTask)", function(){
+	var lastTask;
+	var outerNotify, innerNotify;
+
+	queues.enqueueByQueue({
+		"notify": [outerNotify = function notify () {
+
+			queues.enqueueByQueue({
+				"notify": [innerNotify = function notify () {
+					lastTask = queues.lastTask();
+				}],
+				"domUI": [function domUI () {
+					var stack = queues.stack(lastTask);
+					QUnit.equal(stack[0].fn, outerNotify);
+					QUnit.equal(stack[1].fn, innerNotify);
+				}]
+			});
+
+		}]
+	});
+});
+
+
+QUnit.test(".runAsTask(fn)", function(){
+	var lastTask;
+	var outerNotify, innerNotify;
+	var obj = {};
+	var thing = function(){
+		queues.enqueueByQueue({
+			"notify": [innerNotify = function notify () {
+				lastTask = queues.lastTask();
+			}],
+			"domUI": [function domUI () {
+				var stack = queues.stack(lastTask);
+				QUnit.equal(stack[0].fn, outerNotify);
+				QUnit.equal(stack[1].fn, thing);
+				QUnit.deepEqual(stack[1].args[0], 1);
+				QUnit.equal(stack[1].context, obj);
+				QUnit.equal(stack[2].fn, innerNotify);
+			}]
+		});
+	};
+	var thingQueued = queues.runAsTask(thing);
+
+	queues.enqueueByQueue({
+		"notify": [outerNotify = function notify () {
+			thingQueued.call(obj, 1);
+		}]
+	});
 });
