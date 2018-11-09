@@ -2,6 +2,7 @@ var QUnit = require( 'steal-qunit' );
 var queues = require( "can-queues" );
 var canDev = require( 'can-log/dev/dev' );
 var CompletionQueue = require( "./completion-queue" );
+var testHelpers = require("can-test-helpers");
 
 QUnit.module( 'can-queues' );
 
@@ -421,7 +422,7 @@ QUnit.test("dequeue a priority queue", 0, function(){
 	queue.flush();
 });
 
-QUnit.test(".lastTask()", function(){
+testHelpers.dev.devOnlyTest(".lastTask()", function(){
 	function notify () {
 		var lastTask = queues.lastTask();
 		QUnit.equal(lastTask.fn,notify);
@@ -432,7 +433,7 @@ QUnit.test(".lastTask()", function(){
 
 });
 
-QUnit.test(".stack(lastTask)", function(){
+testHelpers.dev.devOnlyTest(".stack(lastTask)", function(){
 	var lastTask;
 	var outerNotify, innerNotify;
 
@@ -455,7 +456,7 @@ QUnit.test(".stack(lastTask)", function(){
 });
 
 
-QUnit.test(".runAsTask(fn)", function(){
+testHelpers.dev.devOnlyTest(".runAsTask(fn)", function(){
 	var lastTask;
 	var outerNotify, innerNotify;
 	var obj = {};
