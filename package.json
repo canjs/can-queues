@@ -43,6 +43,7 @@
     "can-namespace": "^1.0.0"
   },
   "devDependencies": {
+    "can-test-helpers": "^1.1.2",
     "docco": "^0.7.0",
     "done-serve": "^1.0.0",
     "donejs-cli": "^1.0.0",
