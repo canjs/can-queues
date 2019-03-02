@@ -5,8 +5,6 @@
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/canjs/can-queues/blob/master/LICENSE)
 [![npm version](https://badge.fury.io/js/can-queues.svg)](https://www.npmjs.com/package/can-queues)
 [![Travis build status](https://travis-ci.org/canjs/can-queues.svg?branch=master)](https://travis-ci.org/canjs/can-queues)
-[![AppVeyor build status](https://ci.appveyor.com/api/projects/status/github/canjs/can-queues?branch=master&svg=true)](https://ci.appveyor.com/project/matthewp/can-queues)
-[![Coverage status](https://coveralls.io/repos/github/canjs/can-queues/badge.svg?branch=master)](https://coveralls.io/github/canjs/can-queues?branch=master)
 [![Greenkeeper badge](https://badges.greenkeeper.io/canjs/can-queues.svg)](https://greenkeeper.io/)
 
 Exports an object with the following:
