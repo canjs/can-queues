@@ -4,6 +4,7 @@ var Queue = require( './queue' );
 var PriorityQueue = require( './priority-queue' );
 var queueState = require( './queue-state' );
 var CompletionQueue = require( "./completion-queue" );
+var DomOrderQueue = require("./dom-order-queue");
 var ns = require( "can-namespace" );
 
 // How many `batch.start` - `batch.stop` calls have been made.
@@ -21,7 +22,12 @@ var batchData;
 var queueNames = ["notify", "derive", "domUI", "mutate"];
 // Create all the queues so that when one is complete,
 // the next queue is flushed.
-var NOTIFY_QUEUE, DERIVE_QUEUE, DOM_UI_QUEUE, MUTATE_QUEUE;
+var NOTIFY_QUEUE,
+	DERIVE_QUEUE,
+	DOM_DERIVE_QUEUE,
+	DOM_UI_QUEUE,
+	DOM_QUEUE,
+	MUTATE_QUEUE;
 
 NOTIFY_QUEUE = new Queue( "NOTIFY", {
 	onComplete: function () {
@@ -39,6 +45,15 @@ NOTIFY_QUEUE = new Queue( "NOTIFY", {
 
 DERIVE_QUEUE = new PriorityQueue( "DERIVE", {
 	onComplete: function () {
+		DOM_DERIVE_QUEUE.flush();
+	},
+	onFirstTask: function () {
+		addedTask = true;
+	}
+});
+
+DOM_DERIVE_QUEUE = new DomOrderQueue( "DOM_DERIVE" ,{
+	onComplete: function () {
 		DOM_UI_QUEUE.flush();
 	},
 	onFirstTask: function () {
@@ -47,6 +62,15 @@ DERIVE_QUEUE = new PriorityQueue( "DERIVE", {
 });
 
 DOM_UI_QUEUE = new CompletionQueue( "DOM_UI", {
+	onComplete: function () {
+		DOM_QUEUE.flush();
+	},
+	onFirstTask: function () {
+		addedTask = true;
+	}
+});
+
+DOM_QUEUE = new DomOrderQueue( "DOM", {
 	onComplete: function () {
 		MUTATE_QUEUE.flush();
 	},
@@ -69,9 +93,12 @@ var queues = {
 	Queue: Queue,
 	PriorityQueue: PriorityQueue,
 	CompletionQueue: CompletionQueue,
+	DomOrderQueue: DomOrderQueue,
 	notifyQueue: NOTIFY_QUEUE,
 	deriveQueue: DERIVE_QUEUE,
+	domDerive: DOM_DERIVE_QUEUE,
 	domUIQueue: DOM_UI_QUEUE,
+	domQueue: DOM_UI_QUEUE,
 	mutateQueue: MUTATE_QUEUE,
 	batch: {
 		start: function () {
