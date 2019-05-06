@@ -96,7 +96,7 @@ var queues = {
 	DomOrderQueue: DomOrderQueue,
 	notifyQueue: NOTIFY_QUEUE,
 	deriveQueue: DERIVE_QUEUE,
-	domDerive: DOM_DERIVE_QUEUE,
+	domDeriveQueue: DOM_DERIVE_QUEUE,
 	domUIQueue: DOM_UI_QUEUE,
 	domQueue: DOM_UI_QUEUE,
 	mutateQueue: MUTATE_QUEUE,
