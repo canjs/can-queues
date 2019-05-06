@@ -1,6 +1,7 @@
 "use strict";
 var Queue = require( "./queue" );
 var sortedIndexBy = require("./sorted-index-by");
+var elementSort = require("./element-sort");
 
 // TODO: call sortable queue and take how it should be sorted ...
 function sortTasks(taskA, taskB){
@@ -36,8 +37,8 @@ DomOrderQueue.prototype.enqueue = function ( fn, context, args, meta ) {
 
 		//!steal-remove-start
 		if(process.env.NODE_ENV !== 'production') {
-			if(!meta || !meta.priority) {
-				throw new Error("DomDepthQueue tasks must be created with a meta.priority.")
+			if(!meta || !meta.element) {
+				throw new Error("DomOrderQueue tasks must be created with a meta.element.");
 			}
 		}
 		//!steal-remove-end
@@ -101,7 +102,7 @@ DomOrderQueue.prototype.dequeue = function(fn){
 	var task = this.taskMap.get( fn );
 	if ( task ) {
 
-		var index = this.tasks.indexOf(task)
+		var index = this.tasks.indexOf(task);
 
 		if ( index >= 0 ) {
 			this.tasks.splice( index, 1 );
