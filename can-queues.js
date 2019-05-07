@@ -23,15 +23,15 @@ var queueNames = ["notify", "derive", "domUI", "mutate"];
 // Create all the queues so that when one is complete,
 // the next queue is flushed.
 var NOTIFY_QUEUE,
-	DERIVE_QUEUE,
 	DOM_DERIVE_QUEUE,
+	DERIVE_QUEUE,
 	DOM_UI_QUEUE,
 	DOM_QUEUE,
 	MUTATE_QUEUE;
 
 NOTIFY_QUEUE = new Queue( "NOTIFY", {
 	onComplete: function () {
-		DERIVE_QUEUE.flush();
+		DOM_DERIVE_QUEUE.flush();
 	},
 	onFirstTask: function () {
 		// Flush right away if we aren't in a batch.
@@ -43,16 +43,16 @@ NOTIFY_QUEUE = new Queue( "NOTIFY", {
 	}
 });
 
-DERIVE_QUEUE = new PriorityQueue( "DERIVE", {
+DOM_DERIVE_QUEUE = new DomOrderQueue( "DOM_DERIVE" ,{
 	onComplete: function () {
-		DOM_DERIVE_QUEUE.flush();
+		DERIVE_QUEUE.flush();
 	},
 	onFirstTask: function () {
 		addedTask = true;
 	}
 });
 
-DOM_DERIVE_QUEUE = new DomOrderQueue( "DOM_DERIVE" ,{
+DERIVE_QUEUE = new PriorityQueue( "DERIVE", {
 	onComplete: function () {
 		DOM_UI_QUEUE.flush();
 	},
@@ -60,6 +60,8 @@ DOM_DERIVE_QUEUE = new DomOrderQueue( "DOM_DERIVE" ,{
 		addedTask = true;
 	}
 });
+
+
 
 DOM_UI_QUEUE = new CompletionQueue( "DOM_UI", {
 	onComplete: function () {
@@ -95,8 +97,8 @@ var queues = {
 	CompletionQueue: CompletionQueue,
 	DomOrderQueue: DomOrderQueue,
 	notifyQueue: NOTIFY_QUEUE,
-	deriveQueue: DERIVE_QUEUE,
 	domDeriveQueue: DOM_DERIVE_QUEUE,
+	deriveQueue: DERIVE_QUEUE,
 	domUIQueue: DOM_UI_QUEUE,
 	domQueue: DOM_UI_QUEUE,
 	mutateQueue: MUTATE_QUEUE,
@@ -212,6 +214,7 @@ var queues = {
 	},
 	log: function () {
 		NOTIFY_QUEUE.log.apply( NOTIFY_QUEUE, arguments );
+		DOM_DERIVE_QUEUE.log.apply( DOM_DERIVE_QUEUE, arguments );
 		DERIVE_QUEUE.log.apply( DERIVE_QUEUE, arguments );
 		DOM_UI_QUEUE.log.apply( DOM_UI_QUEUE, arguments );
 		MUTATE_QUEUE.log.apply( MUTATE_QUEUE, arguments );
