@@ -25,10 +25,11 @@ DomOrderQueue.prototype = Object.create( Queue.prototype );
 DomOrderQueue.prototype.constructor = DomOrderQueue;
 
 DomOrderQueue.prototype.enqueue = function ( fn, context, args, meta ) {
+	var task;
 	// Only allow the enqueing of a given function once.
 	if ( !this.taskMap.has( fn ) ) {
 
-		var task = {
+		task = {
 			fn: fn,
 			context: context,
 			args: args,
@@ -58,6 +59,14 @@ DomOrderQueue.prototype.enqueue = function ( fn, context, args, meta ) {
 		if ( task.length === 1 ) {
 			this.callbacks.onFirstTask( this );
 		}
+	} else {
+		// update the task with the new data
+		// TODO: ideally this would key off the mutation instead of the function.
+		// We could make it key off the element and function,  not just function.
+		task = this.taskMap.get( fn );
+		task.context = context;
+		task.args = args;
+		task.meta = meta;
 	}
 };
 

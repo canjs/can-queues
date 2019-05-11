@@ -72,7 +72,7 @@ DOM_UI_QUEUE = new CompletionQueue( "DOM_UI", {
 	}
 });
 
-DOM_QUEUE = new DomOrderQueue( "DOM", {
+DOM_QUEUE = new DomOrderQueue( "DOM   ", {
 	onComplete: function () {
 		MUTATE_QUEUE.flush();
 	},
@@ -100,7 +100,7 @@ var queues = {
 	domDeriveQueue: DOM_DERIVE_QUEUE,
 	deriveQueue: DERIVE_QUEUE,
 	domUIQueue: DOM_UI_QUEUE,
-	domQueue: DOM_UI_QUEUE,
+	domQueue: DOM_QUEUE,
 	mutateQueue: MUTATE_QUEUE,
 	batch: {
 		start: function () {
@@ -217,6 +217,7 @@ var queues = {
 		DOM_DERIVE_QUEUE.log.apply( DOM_DERIVE_QUEUE, arguments );
 		DERIVE_QUEUE.log.apply( DERIVE_QUEUE, arguments );
 		DOM_UI_QUEUE.log.apply( DOM_UI_QUEUE, arguments );
+		DOM_QUEUE.log.apply( DOM_QUEUE, arguments );
 		MUTATE_QUEUE.log.apply( MUTATE_QUEUE, arguments );
 	}
 };
