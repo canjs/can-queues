@@ -19,7 +19,7 @@ var batchNum = 0;
 var batchData;
 
 // Used by `.enqueueByQueue` to know the property names that might be passed.
-var queueNames = ["notify", "derive", "domUI", "mutate"];
+var queueNames = ["notify", "domDerive","derive", "domUI", "dom","mutate"];
 // Create all the queues so that when one is complete,
 // the next queue is flushed.
 var NOTIFY_QUEUE,
