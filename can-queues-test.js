@@ -9,7 +9,7 @@ QUnit.module( 'can-queues' );
 QUnit.test( 'basics', function(assert) {
 	function makeCallbackMeta ( handler, context ) {
 		return {
-			QUnit.log: [handler.name + " by " + context.name]
+			log: [handler.name + " by " + context.name]
 		};
 	}
 	var callbackOrder = [];
@@ -58,7 +58,7 @@ QUnit.test( 'basics', function(assert) {
 			callbackOrder.push( "derivedChild.queueUpdate" );
 			queues.deriveQueue.enqueue( this.update, this, [], {
 				priority: 1,
-				QUnit.log: ["update on " + this.name]
+				log: ["update on " + this.name]
 			});
 		},
 		update: function () {
@@ -109,7 +109,7 @@ QUnit.test( 'basics', function(assert) {
 			callbackOrder.push( "root.queueUpdate" );
 			queues.deriveQueue.enqueue( this.update, this, [], {
 				priority: 1,
-				QUnit.log: ["update on " + this.name]
+				log: ["update on " + this.name]
 			});
 		},
 		update: function () {
@@ -184,7 +184,7 @@ if ( System.env.indexOf( 'production' ) < 0 ) {
 	QUnit.test( "logStack", function(assert) {
 		function makeCallbackMeta( handler, context ){
 			return {
-				QUnit.log: [handler.name + " by " + context.name]
+				log: [handler.name + " by " + context.name]
 			};
 		}
 
@@ -227,7 +227,7 @@ if ( System.env.indexOf( 'production' ) < 0 ) {
 				callbackOrder.push( "fullName.queueUpdate" );
 				queues.deriveQueue.enqueue( this.update, this, [], {
 					priority: 1,
-					QUnit.log: ["update on " + this.name]
+					log: ["update on " + this.name]
 				});
 			},
 			update: function update () {
@@ -407,7 +407,8 @@ QUnit.test( "priority queue can't flush already ran task", function(assert) {
 	assert.deepEqual( ran, ["1", "2", "3"] );
 });
 
-QUnit.test("dequeue a priority queue", 0, function(assert) {
+QUnit.test("dequeue a priority queue", function(assert) {
+	assert.expect(0);
 	var queue = new queues.PriorityQueue( "priority" );
 
 	var task1 = function () {
