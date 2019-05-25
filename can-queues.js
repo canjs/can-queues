@@ -31,7 +31,7 @@ var NOTIFY_QUEUE,
 
 NOTIFY_QUEUE = new Queue( "NOTIFY", {
 	onComplete: function () {
-		DOM_DERIVE_QUEUE.flush();
+		DERIVE_QUEUE.flush();
 	},
 	onFirstTask: function () {
 		// Flush right away if we aren't in a batch.
@@ -43,16 +43,21 @@ NOTIFY_QUEUE = new Queue( "NOTIFY", {
 	}
 });
 
-DOM_DERIVE_QUEUE = new DomOrderQueue( "DOM_DERIVE" ,{
+DERIVE_QUEUE = new PriorityQueue( "DERIVE", {
 	onComplete: function () {
-		DERIVE_QUEUE.flush();
+		DOM_DERIVE_QUEUE.flush();
 	},
 	onFirstTask: function () {
 		addedTask = true;
 	}
 });
 
-DERIVE_QUEUE = new PriorityQueue( "DERIVE", {
+// DOM_DERIVE comes next so that any prior derives have a chance
+// to settle before the derives that actually affect the DOM
+// are re-caculated.
+// See the `Child bindings are called before the parent` can-stache test.
+// All stache-related observables should update in DOM order
+DOM_DERIVE_QUEUE = new DomOrderQueue( "DOM_DERIVE" ,{
 	onComplete: function () {
 		DOM_UI_QUEUE.flush();
 	},
@@ -60,7 +65,6 @@ DERIVE_QUEUE = new PriorityQueue( "DERIVE", {
 		addedTask = true;
 	}
 });
-
 
 
 DOM_UI_QUEUE = new CompletionQueue( "DOM_UI", {
