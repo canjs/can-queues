@@ -29,6 +29,8 @@ var NOTIFY_QUEUE,
 	DOM_QUEUE,
 	MUTATE_QUEUE;
 
+// This is for immediate notification. This is where we teardown (remove childNodes)
+// immediately. 
 NOTIFY_QUEUE = new Queue( "NOTIFY", {
 	onComplete: function () {
 		DERIVE_QUEUE.flush();
@@ -43,6 +45,7 @@ NOTIFY_QUEUE = new Queue( "NOTIFY", {
 	}
 });
 
+// For observations not connected to the DOM
 DERIVE_QUEUE = new PriorityQueue( "DERIVE", {
 	onComplete: function () {
 		DOM_DERIVE_QUEUE.flush();
@@ -56,7 +59,9 @@ DERIVE_QUEUE = new PriorityQueue( "DERIVE", {
 // to settle before the derives that actually affect the DOM
 // are re-caculated.
 // See the `Child bindings are called before the parent` can-stache test.
-// All stache-related observables should update in DOM order
+// All stache-related observables should update in DOM order.
+
+// Observations that are given an element update their value here.
 DOM_DERIVE_QUEUE = new DomOrderQueue( "DOM_DERIVE" ,{
 	onComplete: function () {
 		DOM_UI_QUEUE.flush();
@@ -66,7 +71,7 @@ DOM_DERIVE_QUEUE = new DomOrderQueue( "DOM_DERIVE" ,{
 	}
 });
 
-
+// The old DOM_UI queue
 DOM_UI_QUEUE = new CompletionQueue( "DOM_UI", {
 	onComplete: function () {
 		DOM_QUEUE.flush();
@@ -76,6 +81,8 @@ DOM_UI_QUEUE = new CompletionQueue( "DOM_UI", {
 	}
 });
 
+// Update the page here actually.
+// Maybe call DOM_MUTATE?
 DOM_QUEUE = new DomOrderQueue( "DOM   ", {
 	onComplete: function () {
 		MUTATE_QUEUE.flush();
@@ -85,6 +92,7 @@ DOM_QUEUE = new DomOrderQueue( "DOM   ", {
 	}
 });
 
+// Update
 MUTATE_QUEUE = new Queue( "MUTATE", {
 	onComplete: function () {
 		queueState.lastTask = null;
@@ -101,8 +109,8 @@ var queues = {
 	CompletionQueue: CompletionQueue,
 	DomOrderQueue: DomOrderQueue,
 	notifyQueue: NOTIFY_QUEUE,
-	domDeriveQueue: DOM_DERIVE_QUEUE,
 	deriveQueue: DERIVE_QUEUE,
+	domDeriveQueue: DOM_DERIVE_QUEUE,
 	domUIQueue: DOM_UI_QUEUE,
 	domQueue: DOM_QUEUE,
 	mutateQueue: MUTATE_QUEUE,
