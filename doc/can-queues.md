@@ -4,6 +4,7 @@
 @group can-queues/types 0 queue types
 @group can-queues/queues 1 queues
 @group can-queues/methods 2 methods
+@package ../package.json
 
 @description A light weight queue system for scheduling tasks.
 

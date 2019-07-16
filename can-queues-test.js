@@ -6,7 +6,7 @@ var testHelpers = require("can-test-helpers");
 
 QUnit.module( 'can-queues' );
 
-QUnit.test( 'basics', function () {
+QUnit.test( 'basics', function(assert) {
 	function makeCallbackMeta ( handler, context ) {
 		return {
 			log: [handler.name + " by " + context.name]
@@ -132,7 +132,7 @@ QUnit.test( 'basics', function () {
 	gc2.dispatch();
 	queues.batch.stop();
 
-	QUnit.deepEqual( callbackOrder, [
+	assert.deepEqual( callbackOrder, [
 		"gc1.dispatch",
 		"gc2.dispatch",
 		"derivedChild_queueUpdate",
@@ -154,19 +154,19 @@ QUnit.test( 'basics', function () {
 });
 
 if ( System.env.indexOf( 'production' ) < 0 ) {
-	QUnit.test( "log basics", function () {
+	QUnit.test( "log basics", function(assert) {
 		var oldLog = canDev.log;
 
 		canDev.log = function ( area, name ) {
-			QUnit.equal( "Test enqueuing:", area );
+			assert.equal( "Test enqueuing:", area );
 			if (name) {
-				QUnit.equal( "fnName", name );
+				assert.equal( "fnName", name );
 			}
 
 			canDev.log = function ( area, name ) {
-				QUnit.equal( "Test running  :", area );
+				assert.equal( "Test running  :", area );
 				if (name) {
-					QUnit.equal( "fnName", name );
+					assert.equal( "fnName", name );
 				}
 			};
 		};
@@ -181,7 +181,7 @@ if ( System.env.indexOf( 'production' ) < 0 ) {
 		canDev.log = oldLog;
 	});
 
-	QUnit.test( "logStack", function () {
+	QUnit.test( "logStack", function(assert) {
 		function makeCallbackMeta( handler, context ){
 			return {
 				log: [handler.name + " by " + context.name]
@@ -259,7 +259,7 @@ if ( System.env.indexOf( 'production' ) < 0 ) {
 				callbackOrder.push( "gc1_eventHandler_writableChild_dispatch" );
 				var stack = queues.stack();
 				setFnName(this.mutateHandlers[0], "mapFullName_handler");
-				QUnit.deepEqual( stack.map( function ( task ) {
+				assert.deepEqual( stack.map( function ( task ) {
 					return task.meta.stack.name + " " +task.context.name + " " +
 						task.fn.name;
 				}), [
@@ -269,7 +269,7 @@ if ( System.env.indexOf( 'production' ) < 0 ) {
 					"MUTATE map.fullName mapFullName_handler",
 				] );
 
-				QUnit.deepEqual( stack[0].meta.reasonLog, ["map.first = 'ramiya'"] );
+				assert.deepEqual( stack[0].meta.reasonLog, ["map.first = 'ramiya'"] );
 			}],
 			dispatch: function () {
 				callbackOrder.push( "mapFullName.dispatch" );
@@ -285,25 +285,25 @@ if ( System.env.indexOf( 'production' ) < 0 ) {
 	});
 }
 
-QUnit.test( "priority queue orders tasks correctly", function () {
+QUnit.test( "priority queue orders tasks correctly", function(assert) {
 	var queue = new queues.PriorityQueue( "priority" );
 
 	var order = 0;
 	queue.enqueue( function () {
 		order++;
-		QUnit.equal( order, 3, "priority 1 ran after priority 0" );
+		assert.equal( order, 3, "priority 1 ran after priority 0" );
 	}, null, [], {
 		priority: 1
 	});
 
 	var fn = function () {
 		order++;
-		QUnit.equal( order, 2, "priority 2 ran after priority 0 because it was flushed" );
+		assert.equal( order, 2, "priority 2 ran after priority 0 because it was flushed" );
 	};
 
 	queue.enqueue( function () {
 		order++;
-		QUnit.equal( order, 1, "priority 0 ran first" );
+		assert.equal( order, 1, "priority 0 ran first" );
 		queue.flushQueuedTask( fn );
 	}, null, [], {
 		priority: 0
@@ -316,7 +316,7 @@ QUnit.test( "priority queue orders tasks correctly", function () {
 	queue.flush();
 });
 
-QUnit.test( "priority queue works with holes in the order", function () {
+QUnit.test( "priority queue works with holes in the order", function(assert) {
 	var queue = new queues.PriorityQueue( "priority" );
 	var ran = [];
 
@@ -334,10 +334,10 @@ QUnit.test( "priority queue works with holes in the order", function () {
 
 	queue.flush();
 
-	QUnit.deepEqual( ran, ["priority 0", "priority 10"] );
+	assert.deepEqual( ran, ["priority 0", "priority 10"] );
 });
 
-QUnit.test( "DOM_UI_QUEUE", function () {
+QUnit.test( "DOM_UI_QUEUE", function(assert) {
 	var ran = [];
 	queues.enqueueByQueue({
 		"notify": [function notify () { ran.push( "notify" ); }],
@@ -349,10 +349,10 @@ QUnit.test( "DOM_UI_QUEUE", function () {
 		"mutate": [function domUI () { ran.push( "mutate" ); }]
 	});
 
-	QUnit.deepEqual( ran, ["notify", "derive1", "derive2", "domUI", "mutate"], "ran all tasks" );
+	assert.deepEqual( ran, ["notify", "derive1", "derive2", "domUI", "mutate"], "ran all tasks" );
 });
 
-QUnit.test( "CompletionQueue", function () {
+QUnit.test( "CompletionQueue", function(assert) {
 	var queue = new CompletionQueue( "DOM" );
 
 	var ran = [];
@@ -373,10 +373,10 @@ QUnit.test( "CompletionQueue", function () {
 	}, null, [], {});
 
 	queue.flush();
-	QUnit.deepEqual( ran, ["task 1:a", "task 1:b", "task 2", "task 3"] );
+	assert.deepEqual( ran, ["task 1:a", "task 1:b", "task 2", "task 3"] );
 });
 
-QUnit.test( "priority queue can't flush already ran task", function () {
+QUnit.test( "priority queue can't flush already ran task", function(assert) {
 	var queue = new queues.PriorityQueue( "priority" );
 	var ran = [];
 
@@ -389,7 +389,7 @@ QUnit.test( "priority queue can't flush already ran task", function () {
 	});
 
 	queue.enqueue( function () {
-		QUnit.equal( queue.isEnqueued( task1 ), false, "not enqueued" );
+		assert.equal( queue.isEnqueued( task1 ), false, "not enqueued" );
 		queue.flushQueuedTask( task1 );
 		ran.push( "2" );
 	}, null, [], {
@@ -404,14 +404,15 @@ QUnit.test( "priority queue can't flush already ran task", function () {
 
 	queue.flush();
 
-	QUnit.deepEqual( ran, ["1", "2", "3"] );
+	assert.deepEqual( ran, ["1", "2", "3"] );
 });
 
-QUnit.test("dequeue a priority queue", 0, function(){
+QUnit.test("dequeue a priority queue", function(assert) {
+	assert.expect(0);
 	var queue = new queues.PriorityQueue( "priority" );
 
 	var task1 = function () {
-		QUnit.ok(false, "this should not be called");
+		assert.ok(false, "this should not be called");
 	};
 
 	queue.enqueue( task1, null, [], {
@@ -422,10 +423,10 @@ QUnit.test("dequeue a priority queue", 0, function(){
 	queue.flush();
 });
 
-testHelpers.dev.devOnlyTest(".lastTask()", function(){
+testHelpers.dev.devOnlyTest(".lastTask()", function (assert){
 	function notify () {
 		var lastTask = queues.lastTask();
-		QUnit.equal(lastTask.fn,notify);
+		assert.equal(lastTask.fn,notify);
 	}
 	queues.enqueueByQueue({
 		"notify": [notify],
@@ -433,7 +434,7 @@ testHelpers.dev.devOnlyTest(".lastTask()", function(){
 
 });
 
-testHelpers.dev.devOnlyTest(".stack(lastTask)", function(){
+testHelpers.dev.devOnlyTest(".stack(lastTask)", function (assert){
 	var lastTask;
 	var outerNotify, innerNotify;
 
@@ -446,8 +447,8 @@ testHelpers.dev.devOnlyTest(".stack(lastTask)", function(){
 				}],
 				"domUI": [function domUI () {
 					var stack = queues.stack(lastTask);
-					QUnit.equal(stack[0].fn, outerNotify);
-					QUnit.equal(stack[1].fn, innerNotify);
+					assert.equal(stack[0].fn, outerNotify);
+					assert.equal(stack[1].fn, innerNotify);
 				}]
 			});
 
@@ -456,7 +457,7 @@ testHelpers.dev.devOnlyTest(".stack(lastTask)", function(){
 });
 
 
-testHelpers.dev.devOnlyTest(".runAsTask(fn)", function(){
+testHelpers.dev.devOnlyTest(".runAsTask(fn)", function (assert){
 	var lastTask;
 	var outerNotify, innerNotify;
 	var obj = {};
@@ -467,11 +468,11 @@ testHelpers.dev.devOnlyTest(".runAsTask(fn)", function(){
 			}],
 			"domUI": [function domUI () {
 				var stack = queues.stack(lastTask);
-				QUnit.equal(stack[0].fn, outerNotify);
-				QUnit.equal(stack[1].fn, thing);
-				QUnit.deepEqual(stack[1].args[0], 1);
-				QUnit.equal(stack[1].context, obj);
-				QUnit.equal(stack[2].fn, innerNotify);
+				assert.equal(stack[0].fn, outerNotify);
+				assert.equal(stack[1].fn, thing);
+				assert.deepEqual(stack[1].args[0], 1);
+				assert.equal(stack[1].context, obj);
+				assert.equal(stack[2].fn, innerNotify);
 			}]
 		});
 	};
