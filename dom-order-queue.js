@@ -66,7 +66,7 @@ DomOrderQueue.prototype.enqueue = function ( fn, context, args, meta ) {
 		}
 		//!steal-remove-end
 
-		if ( task.length === 1 ) {
+		if ( this.tasks.length === 1 ) {
 			this.callbacks.onFirstTask( this );
 		}
 	} else {

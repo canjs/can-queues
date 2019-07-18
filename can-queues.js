@@ -62,7 +62,7 @@ DERIVE_QUEUE = new PriorityQueue( "DERIVE", {
 // All stache-related observables should update in DOM order.
 
 // Observations that are given an element update their value here.
-DOM_QUEUE = new DomOrderQueue( "DOM_DERIVE" ,{
+DOM_QUEUE = new DomOrderQueue( "DOM   " ,{
 	onComplete: function () {
 		DOM_UI_QUEUE.flush();
 	},
