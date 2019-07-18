@@ -40,7 +40,8 @@
   "dependencies": {
     "can-assign": "^1.0.1",
     "can-log": "^1.0.0",
-    "can-namespace": "^1.0.0"
+    "can-namespace": "^1.0.0",
+    "can-symbol": "^1.6.5"
   },
   "devDependencies": {
     "can-test-helpers": "^1.1.2",

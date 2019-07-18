@@ -2,6 +2,9 @@
 var Queue = require( "./queue" );
 var sortedIndexBy = require("./sorted-index-by");
 var elementSort = require("./element-sort");
+var canSymbol = require("can-symbol");
+
+var canElementSymbol = canSymbol.for("can.element");
 
 // TODO: call sortable queue and take how it should be sorted ...
 function sortTasks(taskA, taskB){
@@ -29,6 +32,13 @@ DomOrderQueue.prototype.enqueue = function ( fn, context, args, meta ) {
 	// Only allow the enqueing of a given function once.
 	if ( !this.taskMap.has( fn ) ) {
 
+		if(!meta) {
+			meta = {};
+		}
+		if(!meta.element) {
+			meta.element = fn[canElementSymbol];
+		}
+
 		task = {
 			fn: fn,
 			context: context,
@@ -38,7 +48,7 @@ DomOrderQueue.prototype.enqueue = function ( fn, context, args, meta ) {
 
 		//!steal-remove-start
 		if(process.env.NODE_ENV !== 'production') {
-			if(!meta || !meta.element) {
+			if( !meta.element ) {
 				throw new Error("DomOrderQueue tasks must be created with a meta.element.");
 			}
 		}
