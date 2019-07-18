@@ -30,7 +30,7 @@ var NOTIFY_QUEUE,
 	MUTATE_QUEUE;
 
 // This is for immediate notification. This is where we teardown (remove childNodes)
-// immediately. 
+// immediately.
 NOTIFY_QUEUE = new Queue( "NOTIFY", {
 	onComplete: function () {
 		DERIVE_QUEUE.flush();
@@ -48,7 +48,7 @@ NOTIFY_QUEUE = new Queue( "NOTIFY", {
 // For observations not connected to the DOM
 DERIVE_QUEUE = new PriorityQueue( "DERIVE", {
 	onComplete: function () {
-		DOM_DERIVE_QUEUE.flush();
+		DOM_QUEUE.flush();
 	},
 	onFirstTask: function () {
 		addedTask = true;
@@ -62,7 +62,7 @@ DERIVE_QUEUE = new PriorityQueue( "DERIVE", {
 // All stache-related observables should update in DOM order.
 
 // Observations that are given an element update their value here.
-DOM_DERIVE_QUEUE = new DomOrderQueue( "DOM_DERIVE" ,{
+DOM_QUEUE = new DomOrderQueue( "DOM_DERIVE" ,{
 	onComplete: function () {
 		DOM_UI_QUEUE.flush();
 	},
@@ -71,19 +71,8 @@ DOM_DERIVE_QUEUE = new DomOrderQueue( "DOM_DERIVE" ,{
 	}
 });
 
-// The old DOM_UI queue
+// The old DOM_UI queue ... we should seek to remove this.
 DOM_UI_QUEUE = new CompletionQueue( "DOM_UI", {
-	onComplete: function () {
-		DOM_QUEUE.flush();
-	},
-	onFirstTask: function () {
-		addedTask = true;
-	}
-});
-
-// Update the page here actually.
-// Maybe call DOM_MUTATE?
-DOM_QUEUE = new DomOrderQueue( "DOM   ", {
 	onComplete: function () {
 		MUTATE_QUEUE.flush();
 	},
@@ -110,9 +99,8 @@ var queues = {
 	DomOrderQueue: DomOrderQueue,
 	notifyQueue: NOTIFY_QUEUE,
 	deriveQueue: DERIVE_QUEUE,
-	domDeriveQueue: DOM_DERIVE_QUEUE,
-	domUIQueue: DOM_UI_QUEUE,
 	domQueue: DOM_QUEUE,
+	domUIQueue: DOM_UI_QUEUE,
 	mutateQueue: MUTATE_QUEUE,
 	batch: {
 		start: function () {
