@@ -214,7 +214,6 @@ var queues = {
 	},
 	log: function () {
 		NOTIFY_QUEUE.log.apply( NOTIFY_QUEUE, arguments );
-		DOM_DERIVE_QUEUE.log.apply( DOM_DERIVE_QUEUE, arguments );
 		DERIVE_QUEUE.log.apply( DERIVE_QUEUE, arguments );
 		DOM_UI_QUEUE.log.apply( DOM_UI_QUEUE, arguments );
 		DOM_QUEUE.log.apply( DOM_QUEUE, arguments );
