@@ -22,8 +22,8 @@ QUnit.test("can associate function with element", function(assert){
 	var fns = ["outer","middle","inner"].map(function(name){
 		var element = createElement("div");
 		var fn = function(){
-			calls.push(name)
-		}
+			calls.push(name);
+		};
 		fn[canSymbol.for("can.element")] = element;
 		if(prev) {
 			prev.appendChild(element);
@@ -37,7 +37,7 @@ QUnit.test("can associate function with element", function(assert){
 	});
 	queue.flush();
 
-	assert.deepEqual(calls,["outer","middle","inner"], "right order when enqueued in order")
+	assert.deepEqual(calls,["outer","middle","inner"], "right order when enqueued in order");
 	calls = [];
 
 
@@ -46,5 +46,5 @@ QUnit.test("can associate function with element", function(assert){
 	});
 	queue.flush();
 
-	assert.deepEqual(calls,["outer","middle","inner"], "right order when enqueued in reverse")
+	assert.deepEqual(calls,["outer","middle","inner"], "right order when enqueued in reverse");
 });
