@@ -1,3 +1,6 @@
+require("./element-sort-test");
+require("./dom-order-queue-test");
+
 var QUnit = require( 'steal-qunit' );
 var queues = require( "can-queues" );
 var canDev = require( 'can-log/dev/dev' );

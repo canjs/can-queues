@@ -4,6 +4,7 @@ var Queue = require( './queue' );
 var PriorityQueue = require( './priority-queue' );
 var queueState = require( './queue-state' );
 var CompletionQueue = require( "./completion-queue" );
+var DomOrderQueue = require("./dom-order-queue");
 var ns = require( "can-namespace" );
 
 // How many `batch.start` - `batch.stop` calls have been made.
@@ -18,11 +19,17 @@ var batchNum = 0;
 var batchData;
 
 // Used by `.enqueueByQueue` to know the property names that might be passed.
-var queueNames = ["notify", "derive", "domUI", "mutate"];
+var queueNames = ["notify", "derive", "domUI", "dom","mutate"];
 // Create all the queues so that when one is complete,
 // the next queue is flushed.
-var NOTIFY_QUEUE, DERIVE_QUEUE, DOM_UI_QUEUE, MUTATE_QUEUE;
+var NOTIFY_QUEUE,
+	DERIVE_QUEUE,
+	DOM_UI_QUEUE,
+	DOM_QUEUE,
+	MUTATE_QUEUE;
 
+// This is for immediate notification. This is where we teardown (remove childNodes)
+// immediately.
 NOTIFY_QUEUE = new Queue( "NOTIFY", {
 	onComplete: function () {
 		DERIVE_QUEUE.flush();
@@ -37,7 +44,24 @@ NOTIFY_QUEUE = new Queue( "NOTIFY", {
 	}
 });
 
+// For observations not connected to the DOM
 DERIVE_QUEUE = new PriorityQueue( "DERIVE", {
+	onComplete: function () {
+		DOM_QUEUE.flush();
+	},
+	onFirstTask: function () {
+		addedTask = true;
+	}
+});
+
+// DOM_DERIVE comes next so that any prior derives have a chance
+// to settle before the derives that actually affect the DOM
+// are re-caculated.
+// See the `Child bindings are called before the parent` can-stache test.
+// All stache-related observables should update in DOM order.
+
+// Observations that are given an element update their value here.
+DOM_QUEUE = new DomOrderQueue( "DOM   " ,{
 	onComplete: function () {
 		DOM_UI_QUEUE.flush();
 	},
@@ -46,6 +70,7 @@ DERIVE_QUEUE = new PriorityQueue( "DERIVE", {
 	}
 });
 
+// The old DOM_UI queue ... we should seek to remove this.
 DOM_UI_QUEUE = new CompletionQueue( "DOM_UI", {
 	onComplete: function () {
 		MUTATE_QUEUE.flush();
@@ -55,6 +80,7 @@ DOM_UI_QUEUE = new CompletionQueue( "DOM_UI", {
 	}
 });
 
+// Update
 MUTATE_QUEUE = new Queue( "MUTATE", {
 	onComplete: function () {
 		queueState.lastTask = null;
@@ -69,8 +95,10 @@ var queues = {
 	Queue: Queue,
 	PriorityQueue: PriorityQueue,
 	CompletionQueue: CompletionQueue,
+	DomOrderQueue: DomOrderQueue,
 	notifyQueue: NOTIFY_QUEUE,
 	deriveQueue: DERIVE_QUEUE,
+	domQueue: DOM_QUEUE,
 	domUIQueue: DOM_UI_QUEUE,
 	mutateQueue: MUTATE_QUEUE,
 	batch: {
@@ -187,6 +215,7 @@ var queues = {
 		NOTIFY_QUEUE.log.apply( NOTIFY_QUEUE, arguments );
 		DERIVE_QUEUE.log.apply( DERIVE_QUEUE, arguments );
 		DOM_UI_QUEUE.log.apply( DOM_UI_QUEUE, arguments );
+		DOM_QUEUE.log.apply( DOM_QUEUE, arguments );
 		MUTATE_QUEUE.log.apply( MUTATE_QUEUE, arguments );
 	}
 };
