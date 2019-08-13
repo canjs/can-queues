@@ -76,6 +76,15 @@ DomOrderQueue.prototype.enqueue = function ( fn, context, args, meta ) {
 		task = this.taskMap.get( fn );
 		task.context = context;
 		task.args = args;
+
+		if(!meta) {
+			meta = {};
+		}
+
+		if(!meta.element) {
+			meta.element = fn[canElementSymbol];
+		}
+
 		task.meta = meta;
 	}
 };
