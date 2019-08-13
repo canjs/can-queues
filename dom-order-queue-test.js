@@ -63,4 +63,4 @@ QUnit.test("Functions call multiple times retain their element", function(assert
 	otherFn[canSymbol.for("can.element")] = createElement("li");
 	queue.enqueue(otherFn, null, {});
 	queue.flush();
-})
+});
