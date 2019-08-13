@@ -48,3 +48,19 @@ QUnit.test("can associate function with element", function(assert){
 
 	assert.deepEqual(calls,["outer","middle","inner"], "right order when enqueued in reverse");
 });
+
+QUnit.test("Functions call multiple times retain their element", function(assert) {
+	var queue = new DomOrderQueue("dom");
+	var element = createElement("span");
+	var fn = function(){
+		assert.ok(true, "called this function");
+	};
+	fn[canSymbol.for("can.element")] = element;
+	queue.enqueue(fn, null, {});
+	queue.enqueue(fn, null, {});
+
+	var otherFn = function(){};
+	otherFn[canSymbol.for("can.element")] = createElement("li");
+	queue.enqueue(otherFn, null, {});
+	queue.flush();
+});
