@@ -86,6 +86,12 @@ DomOrderQueue.prototype.enqueue = function ( fn, context, args, meta ) {
 		}
 
 		task.meta = meta;
+
+		//!steal-remove-start
+		if(process.env.NODE_ENV !== 'production') {
+			this._logEnqueue( task );
+		}
+		//!steal-remove-end
 	}
 };
 

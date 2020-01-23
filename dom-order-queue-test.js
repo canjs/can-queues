@@ -1,6 +1,8 @@
 var QUnit = require('steal-qunit');
 var DomOrderQueue = require("./dom-order-queue");
 var canSymbol = require("can-symbol");
+var testHelpers = require("can-test-helpers");
+
 
 QUnit.module('can-queues/dom-order-queue');
 
@@ -62,5 +64,20 @@ QUnit.test("Functions call multiple times retain their element", function(assert
 	var otherFn = function(){};
 	otherFn[canSymbol.for("can.element")] = createElement("li");
 	queue.enqueue(otherFn, null, {});
+	queue.flush();
+});
+
+testHelpers.dev.devOnlyTest("Re-inserting function in queue does not lose logging stack", function(assert) {
+	var queue = new DomOrderQueue("dom");
+	var element = createElement("span");
+	var fn = function(){
+		assert.ok(true, "called this function");
+	};
+	fn[canSymbol.for("can.element")] = element;
+	queue.enqueue(fn, null, {});
+	assert.ok(queue.tasks[0].meta.stack, "sanity: Stack created for meta");
+	queue.enqueue(fn, null, {});
+
+	assert.ok(queue.tasks[0].meta.stack, "Stack remains in meta");
 	queue.flush();
 });
