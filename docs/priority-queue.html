@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <title>priority-queue.js</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0; maximum-scale=1.0; user-scalable=0;">
+  <link rel="stylesheet" media="all" href="docco.css" />
+</head>
+<body>
+  <div id="container">
+    <div id="background"></div>
+    
+      <ul id="jump_to">
+        <li>
+          <a class="large" href="javascript:void(0);">Jump To &hellip;</a>
+          <a class="small" href="javascript:void(0);">+</a>
+          <div id="jump_wrapper">
+          <div id="jump_page_wrapper">
+            <div id="jump_page">
+              
+                
+                <a class="source" href="can-queues.html">
+                  can-queues.js
+                </a>
+              
+                
+                <a class="source" href="completion-queue.html">
+                  completion-queue.js
+                </a>
+              
+                
+                <a class="source" href="priority-queue.html">
+                  priority-queue.js
+                </a>
+              
+                
+                <a class="source" href="queue-state.html">
+                  queue-state.js
+                </a>
+              
+                
+                <a class="source" href="queue.html">
+                  queue.js
+                </a>
+              
+            </div>
+          </div>
+        </li>
+      </ul>
+    
+    <ul class="sections">
+        
+          <li id="title">
+              <div class="annotation">
+                  <h1>priority-queue.js</h1>
+              </div>
+          </li>
+        
+        
+        
+        <li id="section-1">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-1">&#182;</a>
+              </div>
+              
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="hljs-meta">"use strict"</span>;
+<span class="hljs-keyword">var</span> Queue = <span class="hljs-built_in">require</span>( <span class="hljs-string">"./queue"</span> );
+
+<span class="hljs-keyword">var</span> PriorityQueue = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+	Queue.apply( <span class="hljs-keyword">this</span>, <span class="hljs-built_in">arguments</span> );</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-2">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-2">&#182;</a>
+              </div>
+              <p>A map of a task’s function to the task for that function.
+This is so we can prevent duplicate functions from being enqueued
+and so <code>flushQueuedTask</code> can find the task and run it.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>	<span class="hljs-keyword">this</span>.taskMap = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Map</span>();</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-3">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-3">&#182;</a>
+              </div>
+              <p>An “array-of-arrays”-ish data structure that stores
+each task organized by its priority.  Each object in this list
+looks like <code>{tasks: [...], index: 0}</code> where:</p>
+<ul>
+<li><code>tasks</code> - the tasks for a particular priority.</li>
+<li><code>index</code> - the index of the task waiting to be prioritized.</li>
+</ul>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>	<span class="hljs-keyword">this</span>.taskContainersByPriority = [];</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-4">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-4">&#182;</a>
+              </div>
+              <p>The index within <code>taskContainersByPriority</code> of the first <code>taskContainer</code>
+which has tasks that have not been run.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>	<span class="hljs-keyword">this</span>.curPriorityIndex = <span class="hljs-literal">Infinity</span>;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-5">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-5">&#182;</a>
+              </div>
+              <p>The index within <code>taskContainersByPriority</code> of the last <code>taskContainer</code>
+which has tasks that have not been run.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>	<span class="hljs-keyword">this</span>.curPriorityMax = <span class="hljs-number">0</span>;
+
+	<span class="hljs-keyword">this</span>.isFlushing = <span class="hljs-literal">false</span>;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-6">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-6">&#182;</a>
+              </div>
+              <p>Manage the number of tasks remaining to keep
+this lookup fast.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>	<span class="hljs-keyword">this</span>.tasksRemaining = <span class="hljs-number">0</span>;
+};
+PriorityQueue.prototype = <span class="hljs-built_in">Object</span>.create( Queue.prototype );
+PriorityQueue.prototype.constructor = PriorityQueue;
+
+PriorityQueue.prototype.enqueue = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"> fn, context, args, meta </span>) </span>{</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-7">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-7">&#182;</a>
+              </div>
+              <p>Only allow the enqueing of a given function once.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>	<span class="hljs-keyword">if</span> ( !<span class="hljs-keyword">this</span>.taskMap.has( fn ) ) {
+
+		<span class="hljs-keyword">this</span>.tasksRemaining++;
+
+		<span class="hljs-keyword">var</span> isFirst = <span class="hljs-keyword">this</span>.taskContainersByPriority.length === <span class="hljs-number">0</span>;
+
+		<span class="hljs-keyword">var</span> task = {
+			<span class="hljs-attr">fn</span>: fn,
+			<span class="hljs-attr">context</span>: context,
+			<span class="hljs-attr">args</span>: args,
+			<span class="hljs-attr">meta</span>: meta || {}
+		};
+
+		<span class="hljs-keyword">var</span> taskContainer = <span class="hljs-keyword">this</span>.getTaskContainerAndUpdateRange( task );
+		taskContainer.tasks.push( task );
+		<span class="hljs-keyword">this</span>.taskMap.set( fn, task );</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-8">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-8">&#182;</a>
+              </div>
+              <p>!steal-remove-start</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>		<span class="hljs-keyword">if</span>(process.env.NODE_ENV !== <span class="hljs-string">'production'</span>) {
+			<span class="hljs-keyword">this</span>._logEnqueue( task );
+		}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-9">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-9">&#182;</a>
+              </div>
+              <p>!steal-remove-end</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>
+		<span class="hljs-keyword">if</span> ( isFirst ) {
+			<span class="hljs-keyword">this</span>.callbacks.onFirstTask( <span class="hljs-keyword">this</span> );
+		}
+	}
+};</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-10">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-10">&#182;</a>
+              </div>
+              <p>Given a task, updates the queue’s cursors so that <code>flush</code>
+will be able to run the task.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>PriorityQueue.prototype.getTaskContainerAndUpdateRange = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"> task </span>) </span>{
+	<span class="hljs-keyword">var</span> priority = task.meta.priority || <span class="hljs-number">0</span>;
+
+	<span class="hljs-keyword">if</span> ( priority &lt; <span class="hljs-keyword">this</span>.curPriorityIndex ) {
+		<span class="hljs-keyword">this</span>.curPriorityIndex = priority;
+	}
+
+	<span class="hljs-keyword">if</span> ( priority &gt; <span class="hljs-keyword">this</span>.curPriorityMax ) {
+		<span class="hljs-keyword">this</span>.curPriorityMax = priority;
+	}
+
+	<span class="hljs-keyword">var</span> tcByPriority = <span class="hljs-keyword">this</span>.taskContainersByPriority;
+	<span class="hljs-keyword">var</span> taskContainer = tcByPriority[priority];
+	<span class="hljs-keyword">if</span> ( !taskContainer ) {
+		taskContainer = tcByPriority[priority] = {<span class="hljs-attr">tasks</span>: [], <span class="hljs-attr">index</span>: <span class="hljs-number">0</span>};
+	}
+	<span class="hljs-keyword">return</span> taskContainer;
+};
+
+PriorityQueue.prototype.flush = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-11">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-11">&#182;</a>
+              </div>
+              <p>Only allow one task to run at a time.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>	<span class="hljs-keyword">if</span> ( <span class="hljs-keyword">this</span>.isFlushing ) {
+		<span class="hljs-keyword">return</span>;
+	}
+	<span class="hljs-keyword">this</span>.isFlushing = <span class="hljs-literal">true</span>;
+	<span class="hljs-keyword">while</span> ( <span class="hljs-literal">true</span> ) {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-12">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-12">&#182;</a>
+              </div>
+              <p>If the first prioritized taskContainer with tasks remaining
+is before the last prioritized taskContainer …</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>		<span class="hljs-keyword">if</span> ( <span class="hljs-keyword">this</span>.curPriorityIndex &lt;= <span class="hljs-keyword">this</span>.curPriorityMax ) {
+			<span class="hljs-keyword">var</span> taskContainer = <span class="hljs-keyword">this</span>.taskContainersByPriority[<span class="hljs-keyword">this</span>.curPriorityIndex];</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-13">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-13">&#182;</a>
+              </div>
+              <p>If that task container actually has tasks remaining …</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>			<span class="hljs-keyword">if</span> ( taskContainer &amp;&amp; ( taskContainer.tasks.length &gt; taskContainer.index ) ) {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-14">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-14">&#182;</a>
+              </div>
+              <p>Run the task.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>				<span class="hljs-keyword">var</span> task = taskContainer.tasks[taskContainer.index++];</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-15">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-15">&#182;</a>
+              </div>
+              <p>!steal-remove-start</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>				<span class="hljs-keyword">if</span>(process.env.NODE_ENV !== <span class="hljs-string">'production'</span>) {
+					<span class="hljs-keyword">this</span>._logFlush( task );
+				}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-16">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-16">&#182;</a>
+              </div>
+              <p>!steal-remove-end</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>				<span class="hljs-keyword">this</span>.tasksRemaining--;
+				<span class="hljs-keyword">this</span>.taskMap[<span class="hljs-string">"delete"</span>]( task.fn );
+				task.fn.apply( task.context, task.args );
+
+			} <span class="hljs-keyword">else</span> {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-17">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-17">&#182;</a>
+              </div>
+              <p>Otherwise, move to the next taskContainer.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>				<span class="hljs-keyword">this</span>.curPriorityIndex++;
+			}
+		} <span class="hljs-keyword">else</span> {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-18">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-18">&#182;</a>
+              </div>
+              <p>Otherwise, reset the state for the next <code>.flush()</code>.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>			<span class="hljs-keyword">this</span>.taskMap = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Map</span>();
+			<span class="hljs-keyword">this</span>.curPriorityIndex = <span class="hljs-literal">Infinity</span>;
+			<span class="hljs-keyword">this</span>.curPriorityMax = <span class="hljs-number">0</span>;
+			<span class="hljs-keyword">this</span>.taskContainersByPriority = [];
+			<span class="hljs-keyword">this</span>.isFlushing = <span class="hljs-literal">false</span>;
+			<span class="hljs-keyword">this</span>.callbacks.onComplete( <span class="hljs-keyword">this</span> );
+			<span class="hljs-keyword">return</span>;
+		}
+	}
+};
+
+PriorityQueue.prototype.isEnqueued = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"> fn </span>) </span>{
+	<span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>.taskMap.has( fn );
+};
+
+PriorityQueue.prototype.flushQueuedTask = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"> fn </span>) </span>{
+	<span class="hljs-keyword">var</span> task = <span class="hljs-keyword">this</span>.dequeue(fn);
+	<span class="hljs-keyword">if</span>(task) {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-19">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-19">&#182;</a>
+              </div>
+              <p>!steal-remove-start</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>		<span class="hljs-keyword">if</span>(process.env.NODE_ENV !== <span class="hljs-string">'production'</span>) {
+			<span class="hljs-keyword">this</span>._logFlush( task );
+		}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-20">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-20">&#182;</a>
+              </div>
+              <p>!steal-remove-end</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>		task.fn.apply( task.context, task.args );
+	}
+};
+PriorityQueue.prototype.dequeue = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">fn</span>)</span>{
+	<span class="hljs-keyword">var</span> task = <span class="hljs-keyword">this</span>.taskMap.get( fn );
+	<span class="hljs-keyword">if</span> ( task ) {
+		<span class="hljs-keyword">var</span> priority = task.meta.priority || <span class="hljs-number">0</span>;
+		<span class="hljs-keyword">var</span> taskContainer = <span class="hljs-keyword">this</span>.taskContainersByPriority[priority];
+		<span class="hljs-keyword">var</span> index = taskContainer.tasks.indexOf( task, taskContainer.index );
+
+		<span class="hljs-keyword">if</span> ( index &gt;= <span class="hljs-number">0</span> ) {
+			taskContainer.tasks.splice( index, <span class="hljs-number">1</span> );
+			<span class="hljs-keyword">this</span>.tasksRemaining--;
+			<span class="hljs-keyword">this</span>.taskMap[<span class="hljs-string">"delete"</span>]( task.fn );
+			<span class="hljs-keyword">return</span> task;
+		} <span class="hljs-keyword">else</span> {
+			<span class="hljs-built_in">console</span>.warn(<span class="hljs-string">"Task"</span>, fn, <span class="hljs-string">"has already run"</span>);
+		}
+	}
+};
+
+PriorityQueue.prototype.tasksRemainingCount = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+	<span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>.tasksRemaining;
+};
+
+<span class="hljs-built_in">module</span>.exports = PriorityQueue;</pre></div></div>
+            
+        </li>
+        
+    </ul>
+  </div>
+</body>
+</html>

@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <title>can-queues.js</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0; maximum-scale=1.0; user-scalable=0;">
+  <link rel="stylesheet" media="all" href="docco.css" />
+</head>
+<body>
+  <div id="container">
+    <div id="background"></div>
+    
+      <ul id="jump_to">
+        <li>
+          <a class="large" href="javascript:void(0);">Jump To &hellip;</a>
+          <a class="small" href="javascript:void(0);">+</a>
+          <div id="jump_wrapper">
+          <div id="jump_page_wrapper">
+            <div id="jump_page">
+              
+                
+                <a class="source" href="can-queues.html">
+                  can-queues.js
+                </a>
+              
+                
+                <a class="source" href="completion-queue.html">
+                  completion-queue.js
+                </a>
+              
+                
+                <a class="source" href="priority-queue.html">
+                  priority-queue.js
+                </a>
+              
+                
+                <a class="source" href="queue-state.html">
+                  queue-state.js
+                </a>
+              
+                
+                <a class="source" href="queue.html">
+                  queue.js
+                </a>
+              
+            </div>
+          </div>
+        </li>
+      </ul>
+    
+    <ul class="sections">
+        
+          <li id="title">
+              <div class="annotation">
+                  <h1>can-queues.js</h1>
+              </div>
+          </li>
+        
+        
+        
+        <li id="section-1">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-1">&#182;</a>
+              </div>
+              
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="hljs-meta">"use strict"</span>;
+<span class="hljs-keyword">var</span> canDev = <span class="hljs-built_in">require</span>( <span class="hljs-string">'can-log/dev/dev'</span> );
+<span class="hljs-keyword">var</span> Queue = <span class="hljs-built_in">require</span>( <span class="hljs-string">'./queue'</span> );
+<span class="hljs-keyword">var</span> PriorityQueue = <span class="hljs-built_in">require</span>( <span class="hljs-string">'./priority-queue'</span> );
+<span class="hljs-keyword">var</span> queueState = <span class="hljs-built_in">require</span>( <span class="hljs-string">'./queue-state'</span> );
+<span class="hljs-keyword">var</span> CompletionQueue = <span class="hljs-built_in">require</span>( <span class="hljs-string">"./completion-queue"</span> );
+<span class="hljs-keyword">var</span> DomOrderQueue = <span class="hljs-built_in">require</span>(<span class="hljs-string">"./dom-order-queue"</span>);
+<span class="hljs-keyword">var</span> ns = <span class="hljs-built_in">require</span>( <span class="hljs-string">"can-namespace"</span> );</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-2">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-2">&#182;</a>
+              </div>
+              <p>How many <code>batch.start</code> - <code>batch.stop</code> calls have been made.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="hljs-keyword">var</span> batchStartCounter = <span class="hljs-number">0</span>;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-3">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-3">&#182;</a>
+              </div>
+              <p>If a task was added since the last flush caused by <code>batch.stop</code>.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="hljs-keyword">var</span> addedTask = <span class="hljs-literal">false</span>;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-4">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-4">&#182;</a>
+              </div>
+              <p>If we are flushing due to a <code>batch.stop</code>.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="hljs-keyword">var</span> isFlushing = <span class="hljs-literal">false</span>;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-5">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-5">&#182;</a>
+              </div>
+              <p>Legacy values for the old batchNum.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="hljs-keyword">var</span> batchNum = <span class="hljs-number">0</span>;
+<span class="hljs-keyword">var</span> batchData;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-6">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-6">&#182;</a>
+              </div>
+              <p>Used by <code>.enqueueByQueue</code> to know the property names that might be passed.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="hljs-keyword">var</span> queueNames = [<span class="hljs-string">"notify"</span>, <span class="hljs-string">"derive"</span>, <span class="hljs-string">"domUI"</span>, <span class="hljs-string">"dom"</span>,<span class="hljs-string">"mutate"</span>];</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-7">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-7">&#182;</a>
+              </div>
+              <p>Create all the queues so that when one is complete,
+the next queue is flushed.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="hljs-keyword">var</span> NOTIFY_QUEUE,
+	DERIVE_QUEUE,
+	DOM_UI_QUEUE,
+	DOM_QUEUE,
+	MUTATE_QUEUE;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-8">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-8">&#182;</a>
+              </div>
+              <p>This is for immediate notification. This is where we teardown (remove childNodes)
+immediately.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>NOTIFY_QUEUE = <span class="hljs-keyword">new</span> Queue( <span class="hljs-string">"NOTIFY"</span>, {
+	<span class="hljs-attr">onComplete</span>: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+		DERIVE_QUEUE.flush();
+	},
+	<span class="hljs-attr">onFirstTask</span>: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-9">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-9">&#182;</a>
+              </div>
+              <p>Flush right away if we aren’t in a batch.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>		<span class="hljs-keyword">if</span> ( !batchStartCounter ) {
+			NOTIFY_QUEUE.flush();
+		} <span class="hljs-keyword">else</span> {
+			addedTask = <span class="hljs-literal">true</span>;
+		}
+	}
+});</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-10">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-10">&#182;</a>
+              </div>
+              <p>For observations not connected to the DOM</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>DERIVE_QUEUE = <span class="hljs-keyword">new</span> PriorityQueue( <span class="hljs-string">"DERIVE"</span>, {
+	<span class="hljs-attr">onComplete</span>: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+		DOM_QUEUE.flush();
+	},
+	<span class="hljs-attr">onFirstTask</span>: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+		addedTask = <span class="hljs-literal">true</span>;
+	}
+});</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-11">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-11">&#182;</a>
+              </div>
+              <p>DOM_DERIVE comes next so that any prior derives have a chance
+to settle before the derives that actually affect the DOM
+are re-caculated.
+See the <code>Child bindings are called before the parent</code> can-stache test.
+All stache-related observables should update in DOM order.</p>
+
+            </div>
+            
+        </li>
+        
+        
+        <li id="section-12">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-12">&#182;</a>
+              </div>
+              <p>Observations that are given an element update their value here.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>DOM_QUEUE = <span class="hljs-keyword">new</span> DomOrderQueue( <span class="hljs-string">"DOM   "</span> ,{
+	<span class="hljs-attr">onComplete</span>: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+		DOM_UI_QUEUE.flush();
+	},
+	<span class="hljs-attr">onFirstTask</span>: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+		addedTask = <span class="hljs-literal">true</span>;
+	}
+});</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-13">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-13">&#182;</a>
+              </div>
+              <p>The old DOM_UI queue … we should seek to remove this.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>DOM_UI_QUEUE = <span class="hljs-keyword">new</span> CompletionQueue( <span class="hljs-string">"DOM_UI"</span>, {
+	<span class="hljs-attr">onComplete</span>: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+		MUTATE_QUEUE.flush();
+	},
+	<span class="hljs-attr">onFirstTask</span>: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+		addedTask = <span class="hljs-literal">true</span>;
+	}
+});</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-14">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-14">&#182;</a>
+              </div>
+              <p>Update</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>MUTATE_QUEUE = <span class="hljs-keyword">new</span> Queue( <span class="hljs-string">"MUTATE"</span>, {
+	<span class="hljs-attr">onComplete</span>: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+		queueState.lastTask = <span class="hljs-literal">null</span>;
+		isFlushing = <span class="hljs-literal">false</span>;
+	},
+	<span class="hljs-attr">onFirstTask</span>: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+		addedTask = <span class="hljs-literal">true</span>;
+	}
+});
+
+<span class="hljs-keyword">var</span> queues = {
+	<span class="hljs-attr">Queue</span>: Queue,
+	<span class="hljs-attr">PriorityQueue</span>: PriorityQueue,
+	<span class="hljs-attr">CompletionQueue</span>: CompletionQueue,
+	<span class="hljs-attr">DomOrderQueue</span>: DomOrderQueue,
+	<span class="hljs-attr">notifyQueue</span>: NOTIFY_QUEUE,
+	<span class="hljs-attr">deriveQueue</span>: DERIVE_QUEUE,
+	<span class="hljs-attr">domQueue</span>: DOM_QUEUE,
+	<span class="hljs-attr">domUIQueue</span>: DOM_UI_QUEUE,
+	<span class="hljs-attr">mutateQueue</span>: MUTATE_QUEUE,
+	<span class="hljs-attr">batch</span>: {
+		<span class="hljs-attr">start</span>: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+			batchStartCounter++;
+			<span class="hljs-keyword">if</span> ( batchStartCounter === <span class="hljs-number">1</span> ) {
+				batchNum++;
+				batchData = {<span class="hljs-attr">number</span>: batchNum};
+			}
+		},
+		<span class="hljs-attr">stop</span>: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+			batchStartCounter--;
+			<span class="hljs-keyword">if</span> ( batchStartCounter === <span class="hljs-number">0</span> ) {
+				<span class="hljs-keyword">if</span> ( addedTask ) {
+					addedTask = <span class="hljs-literal">false</span>;
+					isFlushing = <span class="hljs-literal">true</span>;
+					NOTIFY_QUEUE.flush();
+				}
+			}
+		},</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-15">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-15">&#182;</a>
+              </div>
+              <p>Legacy method to return if we are between start and stop calls.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>		isCollecting: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+			<span class="hljs-keyword">return</span> batchStartCounter &gt; <span class="hljs-number">0</span>;
+		},</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-16">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-16">&#182;</a>
+              </div>
+              <p>Legacy method provide a number for each batch.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>		number: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+			<span class="hljs-keyword">return</span> batchNum;
+		},</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-17">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-17">&#182;</a>
+              </div>
+              <p>Legacy method to provide batch information.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>		data: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+			<span class="hljs-keyword">return</span> batchData;
+		}
+	},
+	<span class="hljs-attr">runAsTask</span>: <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">fn, reasonLog</span>)</span>{</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-18">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-18">&#182;</a>
+              </div>
+              <p>!steal-remove-start</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>		<span class="hljs-keyword">if</span>(process.env.NODE_ENV !== <span class="hljs-string">'production'</span>) {
+			<span class="hljs-keyword">return</span> <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>)</span>{
+				queueState.lastTask = {
+					<span class="hljs-attr">fn</span>: fn,
+					<span class="hljs-attr">context</span>: <span class="hljs-keyword">this</span>,
+					<span class="hljs-attr">args</span>: <span class="hljs-built_in">arguments</span>,
+					<span class="hljs-attr">meta</span>: {
+						<span class="hljs-attr">reasonLog</span>: <span class="hljs-keyword">typeof</span> reasonLog === <span class="hljs-string">"function"</span> ? reasonLog.apply(<span class="hljs-keyword">this</span>, <span class="hljs-built_in">arguments</span>): reasonLog,
+						<span class="hljs-attr">parentTask</span>: queueState.lastTask,
+						<span class="hljs-attr">stack</span>: {<span class="hljs-attr">name</span>: <span class="hljs-string">"RUN_AS"</span>}
+					}
+				};
+				<span class="hljs-keyword">var</span> ret = fn.apply(<span class="hljs-keyword">this</span>, <span class="hljs-built_in">arguments</span>);
+				queueState.lastTask = queueState.lastTask &amp;&amp; queueState.lastTask.meta.parentTask;
+				<span class="hljs-keyword">return</span> ret;
+			};
+		}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-19">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-19">&#182;</a>
+              </div>
+              <p>!steal-remove-end</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>		<span class="hljs-keyword">return</span> fn;
+	},
+	<span class="hljs-attr">enqueueByQueue</span>: <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">enqueueByQueue</span> (<span class="hljs-params"> fnByQueue, context, args, makeMeta, reasonLog </span>) </span>{
+		<span class="hljs-keyword">if</span> ( fnByQueue ) {
+			queues.batch.start();</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-20">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-20">&#182;</a>
+              </div>
+              <p>For each queue, check if there are tasks for it.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>			queueNames.forEach( <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"> queueName </span>) </span>{
+				<span class="hljs-keyword">var</span> name = queueName + <span class="hljs-string">"Queue"</span>;
+				<span class="hljs-keyword">var</span> QUEUE = queues[name];
+				<span class="hljs-keyword">var</span> tasks = fnByQueue[queueName];
+				<span class="hljs-keyword">if</span> ( tasks !== <span class="hljs-literal">undefined</span> ) {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-21">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-21">&#182;</a>
+              </div>
+              <p>For each task function, setup the meta and enqueue it.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>					tasks.forEach( <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"> fn </span>) </span>{
+						<span class="hljs-keyword">var</span> meta = makeMeta != <span class="hljs-literal">null</span> ? makeMeta( fn, context, args ) : {};
+						meta.reasonLog = reasonLog;
+						QUEUE.enqueue( fn, context, args, meta );
+					});
+				}
+			});
+			queues.batch.stop();
+		}
+	},
+	<span class="hljs-attr">lastTask</span>: <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>)</span>{
+		<span class="hljs-keyword">return</span> queueState.lastTask;
+	},</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-22">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-22">&#182;</a>
+              </div>
+              <p>Currently an internal method that provides the task stack.
+Returns an array with the first task as the first item.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>	stack: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">task</span>) </span>{
+		<span class="hljs-keyword">var</span> current = task || queueState.lastTask;
+		<span class="hljs-keyword">var</span> stack = [];
+		<span class="hljs-keyword">while</span> ( current ) {
+			stack.unshift( current );</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-23">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-23">&#182;</a>
+              </div>
+              <p>Queue.prototype._logEnqueue ensures
+that the <code>parentTask</code> is always set.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>			current = current.meta.parentTask;
+		}
+		<span class="hljs-keyword">return</span> stack;
+	},
+	<span class="hljs-attr">logStack</span>: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">task</span>) </span>{
+		<span class="hljs-keyword">var</span> stack = <span class="hljs-keyword">this</span>.stack(task);
+		stack.forEach( <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"> task, i </span>) </span>{
+			<span class="hljs-keyword">var</span> meta = task.meta;
+			<span class="hljs-keyword">if</span>( i === <span class="hljs-number">0</span> &amp;&amp; meta &amp;&amp; meta.reasonLog) {
+				canDev.log.apply( canDev, meta.reasonLog);
+			}
+			<span class="hljs-keyword">var</span> log = meta &amp;&amp; meta.log ? meta.log : [task.fn.name, task];
+			canDev.log.apply( canDev, [task.meta.stack.name + <span class="hljs-string">" ran task:"</span>].concat( log ));
+		});
+	},</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-24">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-24">&#182;</a>
+              </div>
+              <p>A method that is not used.  It should return the number of tasks
+remaining, but doesn’t seem to actually work.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>	taskCount: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+		<span class="hljs-keyword">return</span> NOTIFY_QUEUE.tasks.length + DERIVE_QUEUE.tasks.length + DOM_UI_QUEUE.tasks.length + MUTATE_QUEUE.tasks.length;
+	},</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-25">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-25">&#182;</a>
+              </div>
+              <p>A shortcut for flushign the notify queue.  <code>batch.start</code> and <code>batch.stop</code> should be
+used instead.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>	flush: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+		NOTIFY_QUEUE.flush();
+	},
+	<span class="hljs-attr">log</span>: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+		NOTIFY_QUEUE.log.apply( NOTIFY_QUEUE, <span class="hljs-built_in">arguments</span> );
+		DERIVE_QUEUE.log.apply( DERIVE_QUEUE, <span class="hljs-built_in">arguments</span> );
+		DOM_UI_QUEUE.log.apply( DOM_UI_QUEUE, <span class="hljs-built_in">arguments</span> );
+		DOM_QUEUE.log.apply( DOM_QUEUE, <span class="hljs-built_in">arguments</span> );
+		MUTATE_QUEUE.log.apply( MUTATE_QUEUE, <span class="hljs-built_in">arguments</span> );
+	}
+};
+
+<span class="hljs-keyword">if</span> ( ns.queues ) {
+	<span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Error</span>( <span class="hljs-string">"You can't have two versions of can-queues, check your dependencies"</span> );
+} <span class="hljs-keyword">else</span> {
+	<span class="hljs-built_in">module</span>.exports = ns.queues = queues;
+}</pre></div></div>
+            
+        </li>
+        
+    </ul>
+  </div>
+</body>
+</html>
