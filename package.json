@@ -44,7 +44,7 @@
     "can-symbol": "^1.6.5"
   },
   "devDependencies": {
-    "can-test-helpers": "^1.1.2",
+    "can-test-helpers": "^1.1.4",
     "docco": "^0.7.0",
     "done-serve": "^1.0.0",
     "donejs-cli": "^1.0.0",
