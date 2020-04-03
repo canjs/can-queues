@@ -76,6 +76,9 @@ if(process.env.NODE_ENV !== 'production') {
 			var log = task.meta.log ? task.meta.log.concat( task ) : [task.fn.name, task];
 			canDev.log.apply( canDev, [this.name + " enqueuing:"].concat( log ));
 		}
+		if(queueState.taskBreakpoints.has(task.fn) || queueState.taskNameBreakpoints.has(task.fn.name)) {
+			debugger;
+		}
 	};
 	// `_logFlush` MUST be called by all queues prior to flushing in
 	// development.
@@ -83,6 +86,14 @@ if(process.env.NODE_ENV !== 'production') {
 		if ( this._log === true || this._log === "flush" ) {
 			var log = task.meta.log ? task.meta.log.concat( task ) : [task.fn.name, task];
 			canDev.log.apply( canDev, [this.name + " running  :"].concat( log ));
+		}
+		if(queueState.taskBreakpoints.has(task.fn) || queueState.taskNameBreakpoints.has(task.fn.name)) {
+			debugger;
+		}
+		if(queueState.remainingTasksCount <= 0) {
+			throw new Error("Task count limit met. No more tasks will be run. Call queues.stopAfterTaskCount(Infinity) to run tasks indefinitely.");
+		} else {
+			queueState.remainingTasksCount--;
 		}
 		// Update the state to mark this as the task that was run last.
 		queueState.lastTask = task;

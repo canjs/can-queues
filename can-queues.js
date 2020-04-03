@@ -167,6 +167,11 @@ var queues = {
 					tasks.forEach( function ( fn ) {
 						var meta = makeMeta != null ? makeMeta( fn, context, args ) : {};
 						meta.reasonLog = reasonLog;
+						Object.defineProperty(meta,"click to break on next", {
+							get: function(){
+								queueState.taskBreakpoints.set(this.fn, true);
+							}
+						});
 						QUEUE.enqueue( fn, context, args, meta );
 					});
 				}
@@ -217,6 +222,12 @@ var queues = {
 		DOM_UI_QUEUE.log.apply( DOM_UI_QUEUE, arguments );
 		DOM_QUEUE.log.apply( DOM_QUEUE, arguments );
 		MUTATE_QUEUE.log.apply( MUTATE_QUEUE, arguments );
+	},
+	stopAfterTaskCount: function(number){
+		queueState.remainingTasksCount = number;
+	},
+	breakOnTaskName: function(name) {
+		queueState.taskNameBreakpoints.add(name);
 	}
 };
 
